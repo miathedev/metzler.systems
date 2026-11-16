@@ -51,5 +51,13 @@ markup:
     lineNos: false
 security:
   _merge: deep
+  exec:
+    # Hugo >= 0.163: nur whitelisted Binaries dürfen ausgeführt werden
+    # (go + git für Hugo-Module, tailwindcss CLI fürs CSS)
+    allow:
+      - '^go$'
+      - '^git$'
+      - '^node$'
+      - '^tailwindcss$'
 sitemap:
   _merge: deep
