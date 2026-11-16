@@ -1,0 +1,8 @@
+# Default values for kyverno-policies.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# ClusterPolicy: erzwingt, dass ConfigMaps mit immutable: true erstellt werden.
+# System-Namespaces und die automatisch verwaltete kube-root-ca.crt sind ausgenommen.
+configMapImmutable:
+  enabled: true
