@@ -1,0 +1,13 @@
+# Default values for traefik.
+# Werden 1:1 an das offizielle traefik/traefik Chart durchgereicht (Key "traefik").
+
+traefik:
+  # Service-Typ LoadBalancer ist im Chart v42 bereits Default
+  # (service.spec.type: LoadBalancer) — Infomaniak (OpenStack/Octavia) vergibt
+  # dafuer automatisch eine oeffentliche Floating IP.
+  ingressClass:
+    enabled: true
+    name: traefik
+  providers:
+    kubernetesIngress:
+      enabled: true
