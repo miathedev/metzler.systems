@@ -67,12 +67,11 @@ spec:
       namespace: cert-manager
   chart:
     spec:
-      chart: cluster-issuers
+      chart: charts/cluster-issuers
       sourceRef:
         kind: GitRepository
         name: flux-system
         namespace: flux-system
-      path: ./charts/cluster-issuers
       interval: 1m0s
   valuesFrom:
     - kind: Secret
@@ -130,12 +129,11 @@ spec:
       namespace: kyverno
   chart:
     spec:
-      chart: kyverno-policies
+      chart: charts/kyverno-policies
       sourceRef:
         kind: GitRepository
         name: flux-system
         namespace: flux-system
-      path: ./charts/kyverno-policies
       interval: 1m0s
   install:
     remediation:
@@ -159,12 +157,11 @@ spec:
       namespace: cert-manager
   chart:
     spec:
-      chart: website
+      chart: charts/website
       sourceRef:
         kind: GitRepository
         name: flux-system
         namespace: flux-system
-      path: ./charts/website
       interval: 1m0s
   install:
     createNamespace: true
