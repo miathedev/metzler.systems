@@ -1,5 +1,8 @@
-#Secrets und sub charts
+# Secrets
 .env
+# Keine Binaerartefakte im Repo: vendored chart deps werden ignoriert.
+# Flux nutzt fuer Upstream-Charts direkt HelmRepositories (siehe flux/cluster/infomaniak/),
+# lokale Charts ohne Deps kommen als Git-Source.
 charts/*/charts/
 
 # Editor / OS

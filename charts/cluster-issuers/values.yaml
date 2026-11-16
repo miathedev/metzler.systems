@@ -1,20 +1,16 @@
 # Default values for cluster-issuers.
 # Ein ClusterIssuer pro Eintrag; das website-Chart referenziert einen davon
 # ueber die Annotation cert-manager.io/cluster-issuer.
-# Hinweis: Templating ({{ ... }}) funktioniert hier NICHT — Values-Dateien werden
-# nicht gerendert. Die E-Mail kommt ausschliesslich aus der Env-Variable ADMIN_MAIL
-# (geladen aus .env, siehe helmfile.yaml.gotmpl); hier bewusst leer.
+email: ""
 
 clusterIssuers:
   # Staging zuerst testen (keine Rate-Limits), dann prod aktivieren.
   - name: letsencrypt-staging
     enabled: true
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: ""
     ingressClass: traefik
 
   - name: letsencrypt-prod
     enabled: true
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: ""
     ingressClass: traefik

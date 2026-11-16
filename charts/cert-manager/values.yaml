@@ -1,8 +1,0 @@
-# Default values for cert-manager.
-# Wird 1:1 an das offizielle jetstack/cert-manager Chart durchgereicht.
-# Die ClusterIssuer liegen bewusst in einem eigenen Chart (charts/cluster-issuers),
-# das nach diesem Release laeuft — so existieren die CRDs beim Installieren bereits.
-
-cert-manager:
-  crds:
-    enabled: true

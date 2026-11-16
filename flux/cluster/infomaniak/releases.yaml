@@ -1,0 +1,175 @@
+# Admission Controller
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  interval: 30m0s
+  chart:
+    spec:
+      chart: kyverno
+      version: "3.10.0"
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: flux-system
+      interval: 1m0s
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# cert-manager
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: kyverno
+      namespace: kyverno
+  chart:
+    spec:
+      chart: cert-manager
+      version: "v1.21.3"
+      sourceRef:
+        kind: HelmRepository
+        name: jetstack
+        namespace: flux-system
+      interval: 1m0s
+  values:
+    crds:
+      enabled: true
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# ClusterIssuer (Let's Encrypt staging+prod)
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cluster-issuers
+  namespace: cert-manager
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  chart:
+    spec:
+      chart: cluster-issuers
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      path: ./charts/cluster-issuers
+      interval: 1m0s
+  valuesFrom:
+    - kind: Secret
+      name: letsencrypt-email
+      valuesKey: email
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# Traefik Ingress-Controller
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  interval: 30m0s
+  chart:
+    spec:
+      chart: traefik
+      version: "42.4.0"
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+      interval: 1m0s
+  values:
+    ingressClass:
+      enabled: true
+      name: traefik
+    providers:
+      kubernetesIngress:
+        enabled: true
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# Kyverno ClusterPolicies
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kyverno-policies
+  namespace: kyverno
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: kyverno
+      namespace: kyverno
+  chart:
+    spec:
+      chart: kyverno-policies
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      path: ./charts/kyverno-policies
+      interval: 1m0s
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# Webseite
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: website
+  namespace: website
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: traefik
+      namespace: traefik
+    - name: cluster-issuers
+      namespace: cert-manager
+  chart:
+    spec:
+      chart: website
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      path: ./charts/website
+      interval: 1m0s
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
