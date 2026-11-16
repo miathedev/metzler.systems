@@ -1,5 +1,7 @@
 {{- if .Values.configMapImmutable.enabled }}
-apiVersion: kyverno.io/v1
+# Seit Kyverno 1.20 werden legacy kyverno.io/v1 Policies nicht mehr ausgeführt —
+# die neue API-Gruppe ist policies.kyverno.io/v1 (Spec-Struktur ist kompatibel).
+apiVersion: policies.kyverno.io/v1
 kind: ClusterPolicy
 metadata:
   name: {{ include "kyverno-policies.fullname" . }}-configmap-immutable
