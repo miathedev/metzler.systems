@@ -14,3 +14,11 @@ charts/*/charts/
 
 # Logs
 *.log
+
+# Hugo (site/)
+site/public/
+site/resources/
+site/hugo_stats.json
+site/.hugo_build.lock
+site/node_modules/
+site/assets/dist/
