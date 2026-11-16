@@ -1,0 +1,82 @@
+name: website-image
+
+# Baut das Hugo-Site-Image und pusht es nach ghcr.io.
+# Auslöser: Änderungen an site/ (oder diesem Workflow).
+# Der Job bumped am Ende den image.tag in charts/website/values.yaml
+# auf den SHA des Commits — Flux/ArgoCD deployt von dort.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/website.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # Tag-Bump-Commit in charts/website/values.yaml
+  packages: write   # Push nach ghcr.io
+
+concurrency:
+  group: website-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Docker Buildx einrichten
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login ghcr.io
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Tags erzeugen (sha + latest auf main)
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository }}/website
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Image bauen und pushen
+        uses: docker/build-push-action@v7
+        with:
+          context: site
+          file: site/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            HUGO_VERSION=0.170.0
+            PNPM_VERSION=10.14.0
+
+      - name: ghcr-Package public machen (Repo ist public)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PACKAGE=$(echo '${{ github.repository }}/website' | sed 's|/|%2F|')
+          gh api -X PATCH "/user/packages/container/${PACKAGE}/visibility" -f visibility=public \
+            || gh api -X PATCH "/orgs/${{ github.repository_owner }}/packages/container/${PACKAGE}/visibility" -f visibility=public \
+            || echo "Konnte Sichtbarkeit nicht per API setzen — einmal manuell in GitHub unter Packages auf public stellen"
+
+      - name: image.tag im Chart automatisiert auf Commit-SHA aktualisieren
+        run: |
+          yq -i '.image.repository = "ghcr.io/${{ github.repository }}/website" | .image.tag = "${{ github.sha }}"' charts/website/values.yaml
+          git config user.name "github-actions[bot]"
+          # https://github.com/orgs/community/discussions/26560
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add charts/website/values.yaml
+          git commit -m "chore(website): image auf ${{ github.sha }} [skip ci]" || echo "tag bereits aktuell, nichts zu committen"
+          git push

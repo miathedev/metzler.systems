@@ -7,12 +7,13 @@ replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  #https://github.com/nginx/docker-nginx-unprivileged/pkgs/container/nginx-unprivileged
-  repository: nginx/nginx-unprivileged
+  # Wird von .github/workflows/website.yml gebaut und via ghcr.io veröffentlicht.
+  # image.tag wird von der CI auf den jeweiligen Commit-SHA gebumpt (immutable tags).
+  repository: ghcr.io/miathedev/metzler.systems/website
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.30"
+  tag: "latest"
 
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []

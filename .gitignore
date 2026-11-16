@@ -10,7 +10,9 @@ charts/*/charts/
 *.orig
 *~
 .idea/
-.vscode/
+# VSCode: alles lokal ignorieren, außer den geteilten Extension-Empfehlungen
+.vscode/*
+!.vscode/extensions.json
 
 # Logs
 *.log
