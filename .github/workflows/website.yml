@@ -77,9 +77,12 @@ jobs:
           # Der Chart-Tag muss exakt dazu passen, sonst schlaegt der Image-Pull fehl.
           SHORT_SHA=$(echo '${{ github.sha }}' | cut -c1-7)
           yq -i ".image.repository = \"ghcr.io/${{ github.repository }}/website\" | .image.tag = \"sha-${SHORT_SHA}\"" charts/website/values.yaml
+          # Chart-Version mitbumpen: helm-controller cacht Charts am Version-String
+          # und wuerde sonst trotz neuem values.yaml-Tag das alte Chart deployen.
+          yq -i ".version = \"0.3.${{ github.run_number }}\"" charts/website/Chart.yaml
           git config user.name "github-actions[bot]"
           # https://github.com/orgs/community/discussions/26560
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add charts/website/values.yaml
+          git add charts/website/values.yaml charts/website/Chart.yaml
           git commit -m "chore(website): image auf ${{ github.sha }} [skip ci]" || echo "tag bereits aktuell, nichts zu committen"
           git push
