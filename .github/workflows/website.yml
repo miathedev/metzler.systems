@@ -73,7 +73,10 @@ jobs:
 
       - name: image.tag im Chart automatisiert auf Commit-SHA aktualisieren
         run: |
-          yq -i '.image.repository = "ghcr.io/${{ github.repository }}/website" | .image.tag = "${{ github.sha }}"' charts/website/values.yaml
+          # metadata-action pusht type=sha,format=short -> Tag "sha-<7 Zeichen>".
+          # Der Chart-Tag muss exakt dazu passen, sonst schlaegt der Image-Pull fehl.
+          SHORT_SHA=$(echo '${{ github.sha }}' | cut -c1-7)
+          yq -i ".image.repository = \"ghcr.io/${{ github.repository }}/website\" | .image.tag = \"sha-${SHORT_SHA}\"" charts/website/values.yaml
           git config user.name "github-actions[bot]"
           # https://github.com/orgs/community/discussions/26560
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
