@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Git commit-msg Hook — erzwingt den Commit-Style "<Topic>: <beschreibung>".
+# Einmalig pro Clone aktivieren mit: git config core.hooksPath .githooks
+exec "$(git rev-parse --show-toplevel)/pre-commit.sh" commit-msg "$1"

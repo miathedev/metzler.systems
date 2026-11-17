@@ -1,20 +1,37 @@
 #!/usr/bin/env bash
 #
-# pre-commit.sh — alle lokalen Pre-Commit-Checks des Repos.
+# pre-commit.sh — alle lokalen Git-Hook-Checks des Repos.
 #
-# Wird vom Git-Hook .githooks/pre-commit ausgefuehrt. Einmalig pro Clone
+# Wird von den Git-Hooks in .githooks/ ausgefuehrt. Einmalig pro Clone
 # aktivieren mit:
 #
 #   git config core.hooksPath .githooks
 #
+# Modi:
+#   pre-commit.sh                      — pre-commit-Hook (.githooks/pre-commit)
+#   pre-commit.sh commit-msg <file>    — commit-msg-Hook (.githooks/commit-msg)
+#
 # Neuen Check hinzufuegen:
 #   1. Funktion check_<name>() unten definieren (Rueckgabe 0 = bestanden)
-#   2. Funktionsnamen in CHECKS eintragen
+#   2. Funktionsnamen in CHECKS eintragen (bzw. Mode-spezifisch umschalten)
 #
 # Einzelne Checks ueberspringen (z.B. im Notfall):
 #   SKIP=gitleaks git commit ...
 
 set -uo pipefail
+
+# Modus: "pre-commit" (Standard) oder "commit-msg <datei>" (Message-Check).
+MODE="${1:-pre-commit}"
+MSG_FILE=""
+if [[ "$MODE" == "commit-msg" ]]; then
+  MSG_FILE="${2:-}"
+  # Relativen Pfad absolut machen, bevor wir ins Repo-Root wechseln.
+  case "$MSG_FILE" in
+    /*) ;;
+    "") ;;
+    *) MSG_FILE="$PWD/$MSG_FILE" ;;
+  esac
+fi
 
 if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
   echo "pre-commit.sh: laeuft nur innerhalb eines Git-Repos" >&2
@@ -24,6 +41,11 @@ cd "$REPO_ROOT"
 
 # Gepinnte Version fuer den Auto-Install von gitleaks (siehe install_gitleaks).
 GITLEAKS_VERSION="8.30.1"
+# Erlaubter Commit-Style: "<Topic>: <beschreibung>", z.B. "Fix: kyverno ..."
+# oder "chore(website): image auf <sha>". Topic: Wort aus Buchstaben/Ziffern,
+# optional mit Scope in Klammern. Merge-/fixup-/squash!-Commits siehe
+# check_commit_msg.
+COMMIT_MSG_PATTERN='^[A-Za-z][A-Za-z0-9_-]*(\([A-Za-z0-9_./-]+\))?: .+'
 # Repo-lokales Verzeichnis fuer auto-installierte Tools (gitignored via .bin/).
 LOCAL_BIN="$REPO_ROOT/.bin"
 
@@ -99,6 +121,35 @@ check_gitleaks() {
   "$bin" protect --staged --redact --no-banner --verbose
 }
 
+check_commit_msg() {
+  if [[ -z "$MSG_FILE" || ! -f "$MSG_FILE" ]]; then
+    echo "  kein Commit-Message-File uebergeben (Aufruf: pre-commit.sh commit-msg <file>)" >&2
+    return 1
+  fi
+  local first
+  first="$(head -n1 "$MSG_FILE" | tr -d '\r')"
+  # Merge-, fixup!- und squash!-Commits (z.B. rebase --autosquash) ausnehmen
+  case "$first" in
+    "Merge "*|"fixup! "*|"squash! "*)
+      echo "  ausgenommen: $first"
+      return 0
+      ;;
+  esac
+  if [[ -z "${first//[[:space:]]/}" ]]; then
+    echo "  leere Commit-Message" >&2
+    return 1
+  fi
+  if [[ "$first" =~ $COMMIT_MSG_PATTERN ]]; then
+    return 0
+  fi
+  {
+    echo "  Commit-Message verstosst gegen den Style:"
+    echo "    '$first'"
+    echo "  erwartet: '<Topic>: <beschreibung>', z.B. 'Fix: kyverno admission in system namespaces'"
+  } >&2
+  return 1
+}
+
 # ---------------------------------------------------------------------------
 # Check-Registry — hier landen kuenftig weitere Checks
 # ---------------------------------------------------------------------------
@@ -106,6 +157,12 @@ check_gitleaks() {
 CHECKS=(
   check_gitleaks
 )
+
+# Der pre-commit-Hook sieht die Commit-Message nicht — die prueft der
+# commit-msg-Hook in seinem eigenen Modus.
+if [[ "$MODE" == "commit-msg" ]]; then
+  CHECKS=(check_commit_msg)
+fi
 
 # ---------------------------------------------------------------------------
 # Runner
@@ -116,7 +173,11 @@ is_skipped() {
   return 1
 }
 
-echo "pre-commit: Checks laufen in $REPO_ROOT"
+if [[ "$MODE" == "commit-msg" ]]; then
+  echo "commit-msg: pruefe Commit-Message ($MSG_FILE)"
+else
+  echo "pre-commit: Checks laufen in $REPO_ROOT"
+fi
 for check in "${CHECKS[@]}"; do
   name="${check#check_}"
   if is_skipped "$name"; then
@@ -134,7 +195,7 @@ done
 
 if ((${#FAILED_CHECKS[@]} > 0)); then
   echo
-  echo "pre-commit: ${#FAILED_CHECKS[@]} Check(s) fehlgeschlagen: ${FAILED_CHECKS[*]} — Commit abgebrochen."
+  echo "$MODE: ${#FAILED_CHECKS[@]} Check(s) fehlgeschlagen: ${FAILED_CHECKS[*]} — Commit abgebrochen."
   exit 1
 fi
-echo "pre-commit: alle Checks bestanden."
+echo "$MODE: alle Checks bestanden."
