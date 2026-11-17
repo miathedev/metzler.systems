@@ -8,93 +8,152 @@ name:
 postnominals: []
 status:
   icon: "💻"  # Emoji shown on avatar badge: 💻 developer, 🎨 designer, 🚀 startup, 🔬 researcher, 🎓 student
-role: Full-Stack Developer
-email: mia@metzler.systems
+role: DevOps & Site Reliability Engineer
 bio: |
-  Full-stack developer with 5+ years of experience building scalable web applications.
-  Passionate about modern JavaScript, cloud architecture, and creating delightful user experiences.
+  DevOps and SRE with ~3 years of Kubernetes in production, a Linux background since
+  childhood, and a habit of building platforms that fail over instead of failing.
+  Strong in observability (Prometheus, Grafana, Loki, Mimir) and security hardening
+  (PKI, Vault, MFA). Embedded experience via Rust (CAN-FD) and LoRa sensor networks.
+  Based in the DE/CH border region (Küssaberg, DE, 5 minutes from Bad Zurzach) with a
+  G permit (DE→CH). Open to full-time or contract roles.
 
 affiliations:
-  - name: Tech Corp
-    url: https://techcorp.example.com
+  - name: bpm consult ag
+    url: https://www.bpm-consult.com/
 
 links:
-  - icon: at-symbol
-    url: mailto:mia@metzler.systems
-    label: E-mail Me
   - icon: brands/github
     url: https://github.com/miathedev
+    label: GitHub
+  - icon: brands/gitlab
+    url: https://gitlab.com/miathedev
+    label: GitLab
   - icon: brands/linkedin
-    url: https://www.linkedin.com/in/alexjohnson/
-  - icon: brands/x
-    url: https://x.com/alexjohnson
+    url: https://www.linkedin.com/in/mia-metzler/
+    label: LinkedIn
+  - icon: brands/bandcamp
+    url: https://mapaix.bandcamp.com/
+    label: Bandcamp
 
 interests:
-  - Web Development
-  - Cloud Architecture
-  - Open Source
-  - Developer Experience
+  - Hackerspaces (Odenwilusenz, Toolbox Bodensee, Swiss CCC)
+  - Self-hosting & homelab (Proxmox cluster, Kubernetes, GitLab)
+  - Synthesizers and modular patches
+  - Outdoor: hiking, bushcraft, cooking in the wild
 
 education:
-  - degree: B.S. Computer Science
-    institution: State University
-    start: 2015-09-01
-    end: 2019-05-31
+  - degree: B.Sc. Computer Engineering
+    institution: Hochschule Bremen
+    start: 2017-09-01
+    end: 2023-06-30
     summary: |
-      Focus on software engineering and distributed systems.
-      Senior project on distributed caching systems.
-    button:
-      text: View Project
-      url: https://github.com/miathedev/senior-project
-      icon: brands/github
+      Thesis (grade 1.3): feasibility study on provisioning a modular DevOps
+      toolchain infrastructure using Helm (advisor: Prof. Dr.-Ing. Evren Eren).
+      Installed and maintained a large Kubernetes cluster for academic research.
+  - degree: Semester abroad — IoT & Embedded Systems
+    institution: University of Salerno
+    start: 2023-02-01
+    end: 2023-07-31
+    summary: |
+      Fisciano, Italy. Multi-hop LoRa-based sensor network with a focus on
+      encryption and security. Lab of IoT 30/30 cum laude, Embedded Systems 30/30
+      cum laude, Internet of Things 29/30.
 
 experience:
-  - role: Senior Software Engineer
-    org: Tech Corp
-    start: 2023-01-01
+  - role: System Engineer & DevOps Engineer
+    org: bpm consult ag
+    start: 2024-04-01
     summary: |
-      Lead development of microservices architecture serving 1M+ users.
-      Improved API response time by 40% through optimization.
-      Mentored team of 5 junior developers.
-  - role: Full-Stack Developer
-    org: Startup Inc
-    start: 2021-06-01
-    end: 2022-12-31
+      Platform behind beeline (ERP & e-commerce for the book/media trade): 50+ online
+      shops on Linux, KVM and InterSystems IRIS. Lead Linux sysadmin of the data centre
+      incl. incident response. Observability stack (Prometheus/Mimir, Loki,
+      Alertmanager, OpenTelemetry, IPMI), highly available active/active container
+      platform with CI/CD, HA reverse-proxy cluster against bot/DDoS traffic, internal
+      PKI with offline root CA, HashiCorp Vault, hardware-key MFA, credential rotation,
+      blameless postmortems, 2026 technology budget.
+  - role: Infrastructure Engineer (freelance cluster operation since Apr 2024)
+    org: Leo Skull GmbH
+    start: 2023-06-01
     summary: |
-      Built and deployed 3 production applications from scratch.
-      Implemented CI/CD pipeline reducing deployment time by 60%.
-      Led migration from monolith to microservices architecture.
-  - role: Junior Developer
-    org: Web Agency
-    start: 2020-01-01
-    end: 2021-05-31
+      Migrated production infrastructure from Google Cloud to a cost-efficient
+      self-hosted Kubernetes cluster; HA SaaS environments with automated failover and
+      load balancing; PHP/Laravel apps with RabbitMQ and MongoDB ported into the
+      cluster; Prometheus/Grafana/Loki monitoring; shift-left security scans in GitLab
+      CI/CD; Ansible/Bash automation; SD-WAN and corporate networks. Since April 2024 I
+      keep operating the migrated cluster as a freelancer.
+  - role: DevOps and Embedded Systems
+    org: engram GmbH
+    start: 2019-01-01
+    end: 2023-01-31
     summary: |
-      Developed client websites using React and modern web technologies.
-      Participated in code reviews and agile ceremonies.
+      Migrated branch display systems (digital signage, customer guidance) from
+      Windows to Linux — replacing costly Windows licences. CI/CD pipelines, QA
+      processes, deployment strategies for display hardware and cloud environments.
+  - role: Working Student — DevOps
+    org: hmmh multimediahaus AG
+    start: 2018-10-01
+    end: 2019-11-30
+    summary: |
+      Jenkins CI/CD maintenance and modernisation (pipeline parallelisation), JUnit4 to
+      JUnit5 migration, bugfixing in a production Java/Spring e-commerce platform.
 
 skills:
-  - name: Development
+  - name: Platform
     items:
-      - label: TypeScript
-        level: 5
-      - label: React
-        level: 5
-      - label: Node.js
-        level: 5
-      - label: Python
+      - label: Kubernetes (~3 years production)
         level: 4
-  - name: DevOps
-    items:
       - label: Docker
+        level: 5
+      - label: Helm
         level: 4
-      - label: AWS
+      - label: KVM / Proxmox
         level: 4
-      - label: CI/CD
+  - name: OS & Automation
+    items:
+      - label: Linux (Debian, Ubuntu, SLES) — +10 years
+        level: 5
+      - label: Ansible
+        level: 3
+      - label: Bash
+        level: 4
+      - label: Python
+        level: 3
+      - label: GitLab CI/CD & Jenkins
+        level: 4
+      - label: Infrastructure as Code
+        level: 4
+  - name: Observability & Security
+    items:
+      - label: Prometheus / Grafana / Loki / Mimir
+        level: 4
+      - label: OpenTelemetry
+        level: 3
+      - label: Internal PKI & HashiCorp Vault
+        level: 4
+      - label: Hardware-key MFA & credential rotation
+        level: 4
+  - name: Languages & Networking
+    items:
+      - label: Rust (CAN-FD, LoRa)
+        level: 2
+      - label: Java
+        level: 3
+      - label: SD-WAN, firewalls, HA reverse proxies
+        level: 4
+      - label: Git — +10 years, daily tool
         level: 5
 
 languages:
-  - name: English
+  - name: German
     level: 5
     label: Native
+  - name: English
+    level: 5
+    label: Fluent
 
-awards: []
+awards:
+  - name: KCNA — Kubernetes and Cloud Native Associate (passed)
+    institution: Linux Foundation
+  - name: CKA — Certified Kubernetes Administrator (in preparation, end of 2026)
+    institution: Linux Foundation
+    date: 2026-12-31

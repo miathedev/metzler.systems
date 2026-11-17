@@ -32,14 +32,25 @@ enableRobotsTXT: true
 footnotereturnlinkcontents: <sup>^</sup>
 ignoreFiles: [".ipynb_checkpoints$", "\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
 disableAliases: true
+outputFormats:
+  llms:
+    mediaType: text/plain
+    baseName: llms
+    isPlainText: true
+    rel: alternate
 outputs:
-  home: [HTML, RSS, headers, redirects, backlinks]
+  home: [HTML, RSS, llms, headers, redirects, backlinks]
   section: [HTML, RSS]
 imaging:
   resampleFilter: lanczos
-  quality: 90
   anchor: smart
-  hint: picture
+  jpeg:
+    quality: 90
+  webp:
+    quality: 90
+    hint: picture
+  avif:
+    quality: 90
 timeout: 600000
 taxonomies:
   author: authors

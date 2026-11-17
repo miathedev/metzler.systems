@@ -1,6 +1,6 @@
 ---
 title: 'Projects'
-date: 2024-05-19
+date: 2026-05-19
 type: landing
 
 # Page sections
@@ -8,7 +8,7 @@ sections:
   - block: collection
     content:
       title: Selected Projects
-      text: I enjoy making things. Here are a selection of projects that I have worked on over the years.
+      text: Infrastructure, embedded and homelab projects I built and run — Kubernetes, auth webhooks, LLM pipelines.
       filters:
         folders:
           - projects

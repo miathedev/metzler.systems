@@ -3,6 +3,9 @@
 #   The weight parameter defines the order that the links appear.
 
 main:
+  - name: About
+    url: /about/
+    weight: 5
   - name: Projects
     url: /#projects
     weight: 10
@@ -18,3 +21,6 @@ main:
   - name: Contact
     url: /#contact
     weight: 50
+  - name: Links
+    url: /links/
+    weight: 60

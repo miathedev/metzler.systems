@@ -1,0 +1,9 @@
+# {{ site.Title }}
+{{- with site.Params.hugoblox.identity.description }}
+> {{ . }}
+{{- end }}
+
+## Pages
+{{ range site.RegularPages.ByTitle }}
+- [{{ .Title }}]({{ .Permalink }})
+{{- end }}
