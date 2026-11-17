@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Git pre-commit Hook — delegiert an pre-commit.sh im Repo-Root.
+# Einmalig pro Clone aktivieren mit: git config core.hooksPath .githooks
+exec "$(git rev-parse --show-toplevel)/pre-commit.sh" "$@"
