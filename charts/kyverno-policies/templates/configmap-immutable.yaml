@@ -28,6 +28,10 @@ spec:
                 - kube-system
                 - kube-public
                 - kube-node-lease
+                # Kyverno verwaltet seine eigene ConfigMap im Namespace kyverno
+                # selbst (nicht immutable) — ohne Ausnahme blockiert die Policy
+                # künftige Helm-Upgrades von Kyverno.
+                - kyverno
           - resources:
               kinds:
                 - ConfigMap

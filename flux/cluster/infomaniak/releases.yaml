@@ -15,6 +15,11 @@ spec:
         name: kyverno
         namespace: flux-system
       interval: 1m0s
+  values:
+    admissionController:
+      # 3 Replicas, damit ein einzelner Pod-Ausfall (z.B. Node-Drain) nicht
+      # gleich den Admission-Webhook unerreichbar macht (failurePolicy: Fail).
+      replicas: 3
   install:
     createNamespace: true
     remediation:

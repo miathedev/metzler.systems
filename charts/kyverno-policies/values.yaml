@@ -3,6 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # ClusterPolicy: erzwingt, dass ConfigMaps mit immutable: true erstellt werden.
-# System-Namespaces und die automatisch verwaltete kube-root-ca.crt sind ausgenommen.
+# System-Namespaces, der Namespace kyverno (eigene ConfigMap) und die
+# automatisch verwaltete kube-root-ca.crt sind ausgenommen.
 configMapImmutable:
   enabled: true
