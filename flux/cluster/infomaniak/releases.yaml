@@ -79,9 +79,10 @@ spec:
         namespace: flux-system
       interval: 1m0s
   valuesFrom:
+    # Ohne valuesKey: Flux merged das gesamte Secret als Values ->
+    # key "email" landet direkt bei .Values.email im Chart.
     - kind: Secret
       name: letsencrypt-email
-      valuesKey: email
   install:
     remediation:
       retries: 3

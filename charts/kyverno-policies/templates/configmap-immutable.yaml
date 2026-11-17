@@ -1,44 +1,35 @@
 {{- if .Values.configMapImmutable.enabled }}
-# Seit Kyverno 1.20 werden legacy kyverno.io/v1 Policies nicht mehr ausgeführt —
-# die neue API-Gruppe ist policies.kyverno.io/v1 (Spec-Struktur ist kompatibel).
+# Seit Kyverno 1.20 werden legacy kyverno.io/v1 Policies nicht mehr ausgeführt.
+# In policies.kyverno.io gibt es kein ClusterPolicy — die CEL-Äquivalente sind
+# ValidatingPolicy/MutatingPolicy/... (policies.kyverno.io/v1).
 apiVersion: policies.kyverno.io/v1
-kind: ClusterPolicy
+kind: ValidatingPolicy
 metadata:
   name: {{ include "kyverno-policies.fullname" . }}-configmap-immutable
   labels:
     {{- include "kyverno-policies.labels" . | nindent 4 }}
 spec:
-  validationFailureAction: Enforce
+  failureAction: Enforce
   background: true
-  rules:
-    - name: require-immutable
-      match:
-        any:
-          - resources:
-              kinds:
-                - ConfigMap
-      exclude:
-        any:
-          # System-Namespaces und die automatisch verwaltete CA-ConfigMap ausnehmen,
-          # damit der Cluster-Betrieb nicht blockiert wird.
-          - resources:
-              kinds:
-                - ConfigMap
-              namespaces:
-                - kube-system
-                - kube-public
-                - kube-node-lease
-                # Kyverno verwaltet seine eigene ConfigMap im Namespace kyverno
-                # selbst (nicht immutable) — ohne Ausnahme blockiert die Policy
-                # künftige Helm-Upgrades von Kyverno.
-                - kyverno
-          - resources:
-              kinds:
-                - ConfigMap
-              names:
-                - kube-root-ca.crt
-      validate:
-        message: "ConfigMaps müssen mit immutable: true erstellt werden."
-        pattern:
-          immutable: true
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["configmaps"]
+        operations: ["CREATE", "UPDATE"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+            - kube-public
+            - kube-node-lease
+            # Kyverno verwaltet seine eigene ConfigMap im Namespace kyverno
+            # selbst (nicht immutable) — ohne Ausnahme blockiert die Policy
+            # künftige Helm-Upgrades von Kyverno.
+            - kyverno
+  validations:
+    - expression: "object.metadata.name == 'kube-root-ca.crt' || (has(object.immutable) && object.immutable == true)"
+      message: "ConfigMaps müssen mit immutable: true erstellt werden (Ausnahme: kube-root-ca.crt)."
 {{- end }}
