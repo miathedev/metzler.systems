@@ -35,7 +35,8 @@ hugoblox:
     # Fixed to dark — light mode is removed site-wide (see hooks/head-start)
     mode: dark
     # Theme pack: name from data/themes/ or { light: "x", dark: "y" } for mix-and-match
-    pack: "synthwave"
+    # "serverroom" is a local pack (data/themes/serverroom.yaml): ink surfaces + amber accent
+    pack: "serverroom"
     # Optional: Override theme pack colors
     colors:
       primary: ""                       # Tailwind palette name or hex (e.g., "indigo" or "#6366f1")
@@ -62,6 +63,12 @@ hugoblox:
   typography:
     # Theme pack: name from data/fonts/
     pack: "developer"
+    # Inline overrides on top of the pack: no negative tracking on headings
+    # (display sizes opt back in with an explicit tracking class)
+    tracking:
+      heading: "0"
+      body: "0"
+      caps: "0.01em"
 
   # ────────────────────────────────────────────────────────────────────────────
   # LAYOUT

@@ -1,0 +1,43 @@
+# Custom theme pack for metzler.systems — "server room at night".
+# Ink-tinted neutral surfaces (unslop tokens, ink ramp) with a single
+# LED-amber accent taken from the world (status LEDs, terminal glow).
+# Replaces the "synthwave" pack (deep-purple background, neon pink/cyan).
+
+hugoblox:
+  meta:
+    format: "hugoblox-theme@1"
+    name: "Serverroom"
+    vendor: "metzler.systems"
+    version: "1.0.0"
+    license: "MIT"
+    description: "Ink-dark surfaces with one amber accent, for a self-hosted infra portfolio"
+
+  type: "dual"
+
+  dark:
+    colors:
+      primary: "amber"    # LED amber, the one accent: status dot, selection, key figures
+      secondary: "teal"   # only where a second hue is truly needed
+    surfaces:
+      background: "#0b0d14"   # ink page background
+      foreground: "#eef0f5"   # ink primary text
+      header:
+        background: "#0b0d14"
+        foreground: "#eef0f5"
+      footer:
+        background: "#07080d"   # deepest surface
+        foreground: "#7a8296"   # ink muted text
+
+  light:
+    colors:
+      primary: "amber"
+      secondary: "teal"
+    surfaces:
+      background: "#fafafa"
+      foreground: "#171717"
+      header:
+        background: "#f4f4f5"
+        foreground: "#171717"
+      footer:
+        background: "#f4f4f5"
+        foreground: "#525252"

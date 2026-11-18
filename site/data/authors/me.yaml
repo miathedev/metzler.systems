@@ -6,8 +6,6 @@ name:
   given: Mia
   family: Metzler
 postnominals: []
-status:
-  icon: "💻"  # Emoji shown on avatar badge: 💻 developer, 🎨 designer, 🚀 startup, 🔬 researcher, 🎓 student
 role: DevOps & Site Reliability Engineer
 bio: |
   DevOps and SRE with ~3 years of Kubernetes in production, a Linux background since

@@ -6,14 +6,13 @@ date: 2026-01-05
 type: landing
 
 sections:
-  # Developer Hero - Gradient background with name, role, social, and CTAs
+  # Developer Hero - name, typewriter role, social links, one CTA
   - block: dev-hero
     id: hero
     content:
       username: me
-      greeting: "Hi, I'm"
       show_status: true
-      show_scroll_indicator: true
+      show_scroll_indicator: false
       typewriter:
         enable: true
         prefix: "I build"
@@ -26,17 +25,12 @@ sections:
         delete_speed: 40
         pause_time: 2500
       cta_buttons:
-        - text: View My Work
+        - text: View projects
           url: "#projects"
           icon: arrow-down
     design:
       style: centered
       avatar_shape: circle
-      animations: true
-      background:
-        color:
-          light: "#fafafa"
-          dark: "#0a0a0f"
       spacing:
         padding: ["6rem", "0", "4rem", "0"]
 
@@ -44,7 +38,7 @@ sections:
   - block: portfolio
     id: projects
     content:
-      title: "Featured Projects"
+      title: "Featured projects"
       subtitle: "Infrastructure, embedded and homelab projects I built and run"
       count: 6
       filters:
@@ -62,10 +56,6 @@ sections:
       default_button_index: 0
     design:
       columns: 2
-      background:
-        color:
-          light: "#ffffff"
-          dark: "#0d0d12"
       spacing:
         padding: ["4rem", "0", "4rem", "0"]
 
@@ -73,7 +63,7 @@ sections:
   - block: tech-stack
     id: skills
     content:
-      title: "Tech Stack"
+      title: "Tech stack"
       subtitle: "What I run in production and in my homelab"
       categories:
         - name: Platform
@@ -119,10 +109,6 @@ sections:
     design:
       style: grid
       show_levels: false
-      background:
-        color:
-          light: "#f5f5f5"
-          dark: "#08080c"
       spacing:
         padding: ["4rem", "0", "4rem", "0"]
 
@@ -185,10 +171,6 @@ sections:
             * Tech stack: Jenkins, Java, Spring, JUnit
     design:
       columns: '1'
-      background:
-        color:
-          light: "#ffffff"
-          dark: "#0d0d12"
       spacing:
         padding: ["4rem", "0", "4rem", "0"]
 
@@ -196,7 +178,7 @@ sections:
   - block: collection
     id: blog
     content:
-      title: Recent Posts
+      title: Recent posts
       subtitle: 'Notes from production: Kubernetes, Linux, observability'
       text: ''
       filters:
@@ -208,10 +190,6 @@ sections:
     design:
       view: card
       columns: 3
-      background:
-        color:
-          light: "#f5f5f5"
-          dark: "#08080c"
       spacing:
         padding: ["4rem", "0", "4rem", "0"]
 
@@ -219,7 +197,7 @@ sections:
   - block: contact-info
     id: contact
     content:
-      title: Get In Touch
+      title: Get in touch
       subtitle: "Hiring for a Kubernetes, DevOps or SRE role? Let's talk — e-mail: {{< email >}}"
       text: |-
         I'm based in the DE/CH border region — Küssaberg (DE), 5 minutes from
@@ -227,17 +205,13 @@ sections:
         roles. You can also find me on GitHub, LinkedIn and Bandcamp (see Links).
     design:
       columns: '1'
-      background:
-        color:
-          light: "#ffffff"
-          dark: "#0d0d12"
       spacing:
         padding: ["4rem", "0", "4rem", "0"]
 
   # CTA Card
   - block: cta-card
     content:
-      title: "Open to Opportunities"
+      title: "Open to opportunities"
       text: |-
         I'm currently looking for **Kubernetes / DevOps / SRE / platform** roles,
         full-time or contract, in the Zürich / Baden / Aarau / Basel region.
@@ -248,14 +222,6 @@ sections:
         url: uploads/cv-mia-metzler.pdf
         new_tab: true
     design:
-      card:
-        # Light mode: soft pastel theme gradient | Dark mode: rich deep gradient
-        css_class: 'bg-gradient-to-br from-primary-200 via-primary-100 to-secondary-200 dark:from-primary-600 dark:via-primary-700 dark:to-secondary-700'
-        text_color: dark
-      background:
-        color:
-          light: "#f5f5f5"
-          dark: "#08080c"
       spacing:
         padding: ["4rem", "0", "6rem", "0"]
 ---
