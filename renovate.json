@@ -20,6 +20,12 @@
       "matchUpdateTypes": ["patch", "pin", "digest"],
       "minimumReleaseAge": "14 days",
       "automerge": true
+    },
+    {
+      "matchDatasources": ["helm"],
+      "matchUpdateTypes": ["minor"],
+      "minimumReleaseAge": "14 days",
+      "automerge": true
     }
   ]
 }
