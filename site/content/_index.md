@@ -213,7 +213,7 @@ sections:
     content:
       title: "Open to opportunities"
       text: |-
-        I'm currently looking for **Kubernetes / DevOps / SRE / platform** roles,
+        I'm currently looking for Kubernetes / DevOps / SRE / platform roles,
         full-time or contract, in the Zürich / Baden / Aarau / Basel region.
 
         CV and references on request.

@@ -12,9 +12,9 @@ authors:
 featured: true
 ---
 
-ScaleDet is a VST3/AU plugin I built for the **Akai MPC X**: it shows the musical key and scale of whatever audio is playing, in real time, on the device screen. The detector is a small CNN over a chroma front end — and a CNN needs training data. Lots of it, and *labeled* data at that.
+ScaleDet is a VST3/AU plugin I built for the Akai MPC X: it shows the musical key and scale of whatever audio is playing, in real time, on the device screen. The detector is a small CNN over a chroma front end — and a CNN needs training data. Lots of it, and *labeled* data at that.
 
-The training data source I chose is **public internet radio**: thousands of stations stream 24/7 with now-playing metadata. When the title changes, a 30-second snippet of the stream is exactly one training sample, and the song title is a weak label I can look up. That's the harvester. What started as a single Python process writing CSVs is now being split into microservices on my homelab — which doubles as structured **CKA exam prep**, because every Kubernetes topic I need is exactly what the project needs next. It's a solo project I've been building since early 2026: hardware, cluster, and pipeline are all mine.
+The training data source I chose is public internet radio: thousands of stations stream 24/7 with now-playing metadata. When the title changes, a 30-second snippet of the stream is exactly one training sample, and the song title is a weak label I can look up. That's the harvester. What started as a single Python process writing CSVs is now being split into microservices on my homelab — which doubles as structured CKA exam prep, because every Kubernetes topic I need is exactly what the project needs next. It's a solo project I've been building since early 2026: hardware, cluster, and pipeline are all mine.
 
 ![ScaleDet running live on the MPC X — key and scale of the playing audio on the device screen](scaledet-mpc-x.jpg)
 
@@ -50,24 +50,24 @@ flowchart TB
 
 Per song, the pipeline is:
 
-1. A **listener pod** polls a station's now-playing metadata at a polite pace — on a **new title** it records 30 s with ffmpeg.
+1. A listener pod polls a station's now-playing metadata at a polite pace — on a new title it records 30 s with ffmpeg.
 2. The mp3 goes into PostgreSQL as a `bytea` blob (PG is the *only* canonical store — the CSV era is over) and a task id is pushed to Redis.
-3. A **labeler pod** pops the task, materializes the blob to tmpfs, runs a music/speech gate, collects key "votes" from lookup sources, and writes a consensus label row.
-4. The **controller** hands out station shards with leases, reaps dead pods' claims in under 2.5 minutes, cleans up orphans, and fires a **training Job on the GPU** once enough unlabeled data has piled up.
+3. A labeler pod pops the task, materializes the blob to tmpfs, runs a music/speech gate, collects key "votes" from lookup sources, and writes a consensus label row.
+4. The controller hands out station shards with leases, reaps dead pods' claims in under 2.5 minutes, cleans up orphans, and fires a training Job on the GPU once enough unlabeled data has piled up.
 5. The Job trains the CNN and only promotes weights that pass a fixed evaluation gate (MIREX score on a held-out set, plus a regression check) — then the new `cnn_weights.h` gets compiled into the plugin. Deploying to the MPC stays a manual step.
 
 ## Why this shape
 
-- **Single-node k3s** on the GPU box. One node dissolves all RWO/RWX storage questions; local-path plus one OpenEBS LVM volume for PostgreSQL is enough. The escape hatches for multi-node later (nodeSelectors, separate releases) stay open.
-- **PostgreSQL for blobs, Redis for speed.** Snippet audio lives in PG as `bytea` (with autovacuum tuned for the churn); Redis is just the at-most-once queue, the cluster-wide per-IP rate limiter, and the lookup cache. Losing one queue task is accepted — the hourly cleanup reaps the orphan.
-- **Politeness is a hard requirement**: per-IP request caps, per-host station caps, paced polling, captures only on title changes. A bug must never DDoS a small radio station.
-- **No umbrella chart, no operators**: one app Helm chart in its own namespace, infra as separate releases, plain Deployments/StatefulSets — best practice, not gold-plating.
+- Single-node k3s on the GPU box. One node dissolves all RWO/RWX storage questions; local-path plus one OpenEBS LVM volume for PostgreSQL is enough. The escape hatches for multi-node later (nodeSelectors, separate releases) stay open.
+- PostgreSQL for blobs, Redis for speed. Snippet audio lives in PG as `bytea` (with autovacuum tuned for the churn); Redis is just the at-most-once queue, the cluster-wide per-IP rate limiter, and the lookup cache. Losing one queue task is accepted — the hourly cleanup reaps the orphan.
+- Politeness is a hard requirement: per-IP request caps, per-host station caps, paced polling, captures only on title changes. A bug must never DDoS a small radio station.
+- No umbrella chart, no operators: one app Helm chart in its own namespace, infra as separate releases, plain Deployments/StatefulSets — best practice, not gold-plating.
 
 ## What this demonstrates
 
-- **Kubernetes in real conditions**: not a toy cluster — Deployments/StatefulSets, PVCs and StorageClasses, Secrets, claims/leases, kill drills, a minimal-RBAC CI deployer, Helm releases.
-- **Data-pipeline design**: PostgreSQL as the single canonical store (audio blobs included), Redis as an at-most-once queue, idempotent schema migrations, weak-label consensus voting.
-- **MLOps hygiene**: a fixed evaluation gate before any model ships, a regression check on a hard set, and training data that never leaves the cluster.
+- Kubernetes in real conditions: not a toy cluster — Deployments/StatefulSets, PVCs and StorageClasses, Secrets, claims/leases, kill drills, a minimal-RBAC CI deployer, Helm releases.
+- Data-pipeline design: PostgreSQL as the single canonical store (audio blobs included), Redis as an at-most-once queue, idempotent schema migrations, weak-label consensus voting.
+- MLOps hygiene: a fixed evaluation gate before any model ships, a regression check on a hard set, and training data that never leaves the cluster.
 
 ## The CKA angle
 
@@ -75,7 +75,7 @@ The project is deliberately organized as 17 dependency-ordered tickets, and each
 
 ## Roadmap & gates
 
-The 17 tickets group into seven phases. Each phase ends at a **gate** — a measurable acceptance check, usually one SQL query or one kill drill, not a feeling. Status as of 2026-11-03:
+The 17 tickets group into seven phases. Each phase ends at a gate — a measurable acceptance check, usually one SQL query or one kill drill, not a feeling. Status as of 2026-11-03:
 
 ```mermaid
 flowchart LR

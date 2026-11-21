@@ -1,0 +1,7 @@
+{{- /* Maschinenauffindbarkeit der .md-Mirrors: <link rel="alternate" type="text/markdown"> im <head>, wenn die Seite ein md-Output-Format hat. */ -}}
+{{- $title := .Title -}}
+{{- range .AlternativeOutputFormats -}}
+{{- if eq .Name "md" }}
+  <link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $title }} (Markdown)">
+{{- end }}
+{{- end }}

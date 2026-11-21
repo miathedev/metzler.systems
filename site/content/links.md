@@ -12,7 +12,7 @@ No wall of text — just links. Everything below is mine.
 | [cluster-departure](https://github.com/miathedev/cluster-departure) | A train-departure board for your Kubernetes cluster — live pod/node metrics from metrics-server | Python |
 | [ubuntu-cloud-images-lvm](https://github.com/miathedev/ubuntu-cloud-images-lvm) | Ubuntu cloud images converted to LVM | Shell |
 | [adafruit-aht10](https://github.com/miathedev/adafruit-aht10) | Rust port of Adafruit's AHT10 temperature/humidity sensor library | Rust |
-| [metzler.systems](https://github.com/miathedev/metzler.systems) | This website — Hugo static site | Hugo |
+| [metzler.systems](https://github.com/miathedev/metzler.systems) | This website — Hugo → GHCR → Flux/Helm/Kyverno (GitOps) | Hugo |
 
 ## Profiles
 

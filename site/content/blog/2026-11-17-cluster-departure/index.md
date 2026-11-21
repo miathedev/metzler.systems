@@ -11,15 +11,15 @@ authors:
 featured: false
 ---
 
-[cluster-departure](https://github.com/miathedev/cluster-departure) is a small toy I built for my homelab: it renders a Kubernetes cluster as a **train departure board**. Every Deployment is a station, every replica a track, and every pod a train — with live CPU and memory numbers next to each train, so you can see at a glance which workload is hogging the platform.
+[cluster-departure](https://github.com/miathedev/cluster-departure) is a small toy I built for my homelab: it renders a Kubernetes cluster as a train departure board. Every Deployment is a station, every replica a track, and every pod a train — with live CPU and memory numbers next to each train, so you can see at a glance which workload is hogging the platform.
 
 Hopefully your deployments don't get stuck as often as the Deutsche Bahn.
 
 ## How it works
 
-- **Backend**: FastAPI (~140 lines) using the official `kubernetes` Python client. It loads a kubeconfig locally, or the in-cluster config when running inside the cluster, and aggregates Deployments, Replicas/Pods and node/pod metrics into a single `/api/state` payload.
-- **Live metrics**: the numbers come from `metrics-server` (`metrics.k8s.io/v1beta1`) — no Prometheus needed, the API server already aggregates them.
-- **Frontend**: plain static HTML/CSS/JS with sprites, served by the same app. Open `http://localhost:8000` and enjoy the board.
+- Backend: FastAPI (~140 lines) using the official `kubernetes` Python client. It loads a kubeconfig locally, or the in-cluster config when running inside the cluster, and aggregates Deployments, Replicas/Pods and node/pod metrics into a single `/api/state` payload.
+- Live metrics: the numbers come from `metrics-server` (`metrics.k8s.io/v1beta1`) — no Prometheus needed, the API server already aggregates them.
+- Frontend: plain static HTML/CSS/JS with sprites, served by the same app. Open `http://localhost:8000` and enjoy the board.
 
 ## Run it
 

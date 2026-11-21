@@ -12,7 +12,7 @@ featured: true
 weight: 1
 ---
 
-New single out: **Genosse** — one track, released 13 June 2026 on Bandcamp as [Ma Paix](https://mapaix.bandcamp.com/album/genosse).
+New single out: Genosse — one track, released 13 June 2026 on Bandcamp as [Ma Paix](https://mapaix.bandcamp.com/album/genosse).
 
 {{< bandcamp album="2004128651" >}}
 

@@ -38,9 +38,24 @@ outputFormats:
     baseName: llms
     isPlainText: true
     rel: alternate
+  # .md-Mirror fuer jede Seite (LLM-/Agent-Konsum): /about/ -> /about/index.md
+  # Invariante: jede Seite (page, section, taxonomy, term, home) existiert
+  # doppelt — als HTML und als /index.md. Templates: layouts/index.md.md und
+  # layouts/_default/*.md.md, rendern .RawContent — Shortcodes (z.B. {{< email >}})
+  # bleiben roh, dafuer bleiben Markdown-Struktur und Tabellen erhalten;
+  # Front-Matter fehlt im .md. Head-Hook layouts/_partials/hooks/head-start/
+  # md-alternate.html verlinkt den Mirror als <link rel="alternate">.
+  md:
+    mediaType: text/markdown
+    baseName: index
+    isPlainText: true
+    rel: alternate
 outputs:
-  home: [HTML, RSS, llms, headers, redirects, backlinks]
-  section: [HTML, RSS]
+  home: [HTML, RSS, llms, md, headers, redirects, backlinks]
+  page: [HTML, md]
+  section: [HTML, RSS, md]
+  taxonomy: [HTML, RSS, md]
+  term: [HTML, RSS, md]
 imaging:
   resampleFilter: lanczos
   anchor: smart

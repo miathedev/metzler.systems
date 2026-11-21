@@ -15,9 +15,9 @@ This site is a static Hugo build and a publish script. That's the whole architec
 
 ## The short answer
 
-- **Hugo** turns Markdown into static HTML. Builds in under a second, ships minimal JavaScript.
-- **`publish.sh`** runs `hugo --minify` and then `lftp mirror -eR` over SFTP to the webhosting box. No SSH, no CI pipeline — one command, incremental sync.
-- **WordPress is gone.** No database, no plugin roulette, no PHP-FPM pool doing CMS work on every page view.
+- Hugo turns Markdown into static HTML. Builds in under a second, ships minimal JavaScript.
+- `publish.sh` runs `hugo --minify` and then `lftp mirror -eR` over SFTP to the webhosting box. No SSH, no CI pipeline — one command, incremental sync.
+- WordPress is gone. No database, no plugin roulette, no PHP-FPM pool doing CMS work on every page view.
 
 The whole pipeline, as a diagram:
 
@@ -33,7 +33,7 @@ flowchart LR
 
 Every page view of a CMS is a computation. Every plugin is a liability with a changelog. A static site is just files: the webserver serves them with Let's Encrypt and DDoS protection already included in the hosting package, Core Web Vitals are excellent by construction, and an attack surface that consists of read-only files is a small attack surface.
 
-The rule I applied: **everything that can be static must be static.**
+The rule I applied: everything that can be static must be static.
 
 ## Being found: SEO and the AI-crawler side
 
