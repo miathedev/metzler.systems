@@ -17,9 +17,7 @@ Hopefully your deployments don't get stuck as often as the Deutsche Bahn.
 
 ## How it works
 
-- Backend: FastAPI (~140 lines) using the official `kubernetes` Python client. It loads a kubeconfig locally, or the in-cluster config when running inside the cluster, and aggregates Deployments, Replicas/Pods and node/pod metrics into a single `/api/state` payload.
-- Live metrics: the numbers come from `metrics-server` (`metrics.k8s.io/v1beta1`), no Prometheus needed, the API server already aggregates them.
-- Frontend: plain static HTML/CSS/JS with sprites, served by the same app. Open `http://localhost:8000` and enjoy the board.
+The backend is ~140 lines of FastAPI on the official `kubernetes` Python client. It loads a kubeconfig locally, or the in-cluster config when running inside the cluster, and aggregates Deployments, pods and node/pod metrics into a single `/api/state` payload. The live numbers come from `metrics-server` (`metrics.k8s.io/v1beta1`), no Prometheus needed, the API server already aggregates them. The frontend is plain static HTML/CSS/JS with sprites, served by the same app, open `http://localhost:8000` and enjoy the board.
 
 ## Run it
 
@@ -32,6 +30,6 @@ Needs a kubeconfig (or in-cluster config) and `metrics-server` running in the cl
 
 ## Why a departure board
 
-Because `kubectl get pods` tells you *that* something runs, but not *how hot* it is. On a single-node homelab the board answers the actual question, "which of these trains is late (and why)", without opening Grafana. The metaphor also survives contact with reality: a stuck rollout is a delayed departure, a pending pod is a train that never left the station, and a node under pressure is the station master having a day.
+Because `kubectl get pods` tells you *that* something runs, but not *how hot* it is. On a single-node homelab the board answers the actual question, "which of these trains is late (and why)", without opening Grafana. The metaphor holds up in practice: a stuck rollout is a delayed departure, a pending pod is a train that never left the station, and a node under pressure is the station master having a day.
 
 Code is public: <https://github.com/miathedev/cluster-departure>

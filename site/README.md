@@ -6,7 +6,7 @@ rootless nginx.
 
 ## Voraussetzungen
 
-- hugo **extended** (v0.162.0): `hugo version` muss `+extended` zeigen
+- hugo extended (v0.162.0): `hugo version` muss `+extended` zeigen
 - Go (für Hugo Modules, `go.mod`/`go.sum`)
 - node + pnpm (`pnpm install` installiert `tailwindcss` CLI + `preact` -
   beides braucht der Build und liegt in `node_modules/.bin`)
@@ -16,7 +16,7 @@ rootless nginx.
 ```bash
 cd site
 pnpm install                 # einmalig: node_modules
-pnpm dev                     # = hugo server --disableFastRender → http://localhost:1313
+pnpm dev                     # = hugo server --disableFastRender -> http://localhost:1313
 ```
 
 Falls `hugo` direkt aufgerufen wird, muss `node_modules/.bin` im PATH sein

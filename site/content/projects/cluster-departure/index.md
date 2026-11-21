@@ -1,7 +1,7 @@
 ---
 title: "cluster-departure"
 date: 2026-11-17
-summary: "A train-departure board for your Kubernetes cluster, FastAPI backend aggregating Deployments, pods and live metrics-server numbers into one /api/state payload, rendered as a static sprite frontend. Deutsche Bahn, but it's Kubernetes."
+summary: "A train-departure board for your Kubernetes cluster, FastAPI backend aggregating Deployments, pods and live metrics-server numbers into one /api/state payload, rendered as a static sprite frontend. Deutsche Bahn, but for Kubernetes."
 tags:
   - Kubernetes
   - Homelab

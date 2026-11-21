@@ -3,7 +3,7 @@ title: Links
 description: "A link table: GitHub projects I built and profiles where you can find me."
 ---
 
-No wall of text, just links. Everything below is mine.
+Just links. Everything below is mine.
 
 ## Projects
 

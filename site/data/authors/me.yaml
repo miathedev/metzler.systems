@@ -8,12 +8,12 @@ name:
 postnominals: []
 role: DevOps & Site Reliability Engineer
 bio: |
-  DevOps and SRE with ~3 years of Kubernetes in production, a Linux background since
-  childhood, and a habit of building platforms that fail over instead of failing.
-  Strong in observability (Prometheus, Grafana, Loki, Mimir) and security hardening
-  (PKI, Vault, MFA). Embedded experience via Rust (CAN-FD) and LoRa sensor networks.
-  Based in the DE/CH border region (Küssaberg, DE, 5 minutes from Bad Zurzach) with a
-  G permit (DE->CH). Open to full-time or contract roles.
+  DevOps and SRE, three years of Kubernetes in production, Linux since childhood.
+  Platforms that fail over instead of failing. Strong in observability
+  (Prometheus, Grafana, Loki, Mimir) and security hardening (PKI, Vault, MFA).
+  Embedded experience via Rust (CAN-FD) and LoRa sensor networks. Based in the
+  DE/CH border region (Küssaberg, DE, five minutes from Bad Zurzach) with a G
+  permit (DE->CH). Open to full-time or contract roles.
 
 affiliations:
   - name: bpm consult ag

@@ -19,7 +19,7 @@ sections:
         strings:
           - "self-hosted Kubernetes clusters"
           - "observability stacks that answer why"
-          - "HA platforms that fail over, not fail"
+          - "HA platforms that fail over quietly"
           - "Linux infrastructure since childhood"
         type_speed: 70
         delete_speed: 40

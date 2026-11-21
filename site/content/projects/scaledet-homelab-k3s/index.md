@@ -1,7 +1,7 @@
 ---
 title: "ScaleDet homelab on k3s"
 date: 2026-11-03
-summary: "Splitting an internet-radio training-data harvester into microservices on a single-node k3s homelab, PostgreSQL as the canonical store (audio snippets as bytea), Redis as the task queue, a GPU training Job with a fixed evaluation gate. Doubles as CKA exam prep."
+summary: "Splitting an internet-radio training-data harvester into microservices on a single-node k3s homelab, PostgreSQL as the canonical store (audio snippets as bytea), Redis as the task queue, a GPU training Job with a fixed evaluation gate. Also my CKA exam prep."
 tags:
   - Kubernetes
   - DevOps

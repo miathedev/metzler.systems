@@ -8,7 +8,7 @@ sections:
   - block: collection
     content:
       title: Selected Projects
-      text: Infrastructure, embedded and homelab projects I built and run, Kubernetes, auth webhooks, LLM pipelines.
+      text: Infrastructure, embedded and homelab projects I built and run, from Kubernetes auth webhooks to LLM pipelines.
       filters:
         folders:
           - projects
