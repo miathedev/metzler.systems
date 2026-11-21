@@ -30,5 +30,9 @@ RUN hugo --minify
 
 # Letzte Stage
 FROM nginx/nginx-unprivileged:1.30-alpine
+# Base-Image-Tag ist floating — apk upgrade holt gefixte OS-Pakete (z.B. libxml2)
+# aus dem Alpine-Repo, auch wenn nginx das Base-Image nicht neu gebaut hat.
+# https://avd.aquasec.com/nvd/2026/cve-2026-86144/
+RUN apk upgrade --no-cache
 COPY --from=build /src/public/ /usr/share/nginx/html/
 EXPOSE 8080
