@@ -1,16 +1,16 @@
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # HUGO BLOX CONFIGURATION
 # Schema: hugoblox.com/schema/v2
 # Tutorial: https://docs.hugoblox.com/tutorial/
 # Documentation: https://docs.hugoblox.com/
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 hugoblox:
   schema: "2.0"
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # IDENTITY
   # Site-level branding (for people/profiles, use the author system in content/authors/)
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   identity:
     # Site name - shown in navbar, footer, copyright, and browser title by default
     name: "Mia Metzler"
@@ -21,18 +21,18 @@ hugoblox:
     # Short tagline displayed on your site
     tagline: "DevOps & Site Reliability Engineer"
     # Site meta description for search engines and social sharing
-    description: "DevOps & Site Reliability Engineer — ~3 years of Kubernetes in production: GCP-to-self-hosted migration, HA platforms, Prometheus/Grafana/Loki observability, PKI/Vault security hardening. Based in the DE/CH border region."
+    description: "DevOps & Site Reliability Engineer, ~3 years of Kubernetes in production: GCP-to-self-hosted migration, HA platforms, Prometheus/Grafana/Loki observability, PKI/Vault security hardening. Based in the DE/CH border region."
     # Social accounts (used for meta tags like Twitter Cards)
     social:
       twitter: ""                           # Twitter/X handle for Twitter Cards (without @)
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # THEME
   # Color and visual design system
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   theme:
     # Mode: 'light', 'dark', or 'system' (follows OS preference)
-    # Fixed to dark — light mode is removed site-wide (see hooks/head-start)
+    # Fixed to dark, light mode is removed site-wide (see hooks/head-start)
     mode: dark
     # Theme pack: name from data/themes/ or { light: "x", dark: "y" } for mix-and-match
     # "serverroom" is a local pack (data/themes/serverroom.yaml): ink surfaces + amber accent
@@ -56,10 +56,10 @@ hugoblox:
         background: ""
         foreground: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # TYPOGRAPHY
   # Font and text sizing
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   typography:
     # Theme pack: name from data/fonts/
     pack: "developer"
@@ -70,10 +70,10 @@ hugoblox:
       body: "0"
       caps: "0.01em"
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # LAYOUT
   # Spacing and shape tokens
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   layout:
     # Border radius: 'none', 'sm', 'md', 'lg', or 'full'
     radius: "md"
@@ -82,10 +82,10 @@ hugoblox:
     # Avatar shape in author profiles
     avatar_shape: circle                # circle | square | rounded
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # HEADER
   # Site header and navigation bar
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   header:
     enable: true
     # Header style variant
@@ -105,34 +105,34 @@ hugoblox:
       text: "CV"
       url: "uploads/cv-mia-metzler.pdf"
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # FOOTER
   # Site footer
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   footer:
     # Footer style variant
     style: minimal                      # minimal | columns | centered
     language_switcher: true
     # Custom footer text (HTML supported)
-    text: 'Privacy / Datenschutz: <a href="/privacy/">/privacy</a> · <a href="/links/">Links</a>'
+    text: 'Privacy / Datenschutz: <a href="/privacy/">/privacy</a> | <a href="/links/">Links</a>'
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # COPYRIGHT
   # Legal notices and licensing
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   copyright:
     # Copyright notice - supports {year}, {name}, {license} placeholders
-    notice: "© {year} {name}. This work is licensed under {license}"
+    notice: "(c) {year} {name}. This work is licensed under {license}"
     license:
       type: cc                          # cc | custom
       allow_derivatives: false
       share_alike: true
       allow_commercial: false
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # SEO
   # Search engine optimization - overrides and technical settings
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   seo:
     # Browser tab title override (defaults to identity.name if not set)
     title: ""
@@ -156,10 +156,10 @@ hugoblox:
       note: "Guidance for AI crawlers - customize to match your public content."
       contact: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # CONTENT
   # Content rendering and behavior
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   content:
     # Math rendering
     math:
@@ -174,10 +174,10 @@ hugoblox:
     citations:
       style: apa                        # apa | mla | chicago | ieee
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # SEARCH
   # Site search
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   search:
     enable: true
     # Trending/suggested search terms
@@ -185,10 +185,10 @@ hugoblox:
     # Quick action shortcuts in search modal
     quick_actions: []
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # COMMENTS
   # User comments system
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   comments:
     enable: false
     provider: ""                        # giscus | disqus
@@ -200,10 +200,10 @@ hugoblox:
     disqus:
       shortname: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # ANALYTICS
   # Traffic and behavior analytics
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   analytics:
     google:
       measurement_id: ""                # Google Analytics 4: G-XXXXXXXXXX
@@ -220,10 +220,10 @@ hugoblox:
     baidu:
       site_id: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # VERIFICATION
   # Search engine site verification codes
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   verification:
     google: ""
     bing: ""
@@ -232,29 +232,29 @@ hugoblox:
     pinterest: ""
     naver: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # REPOSITORY
   # Source code repository for "Edit this page" links
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   repository:
     enable: false
     url: ""                             # e.g., https://github.com/username/repo
     branch: main
     content_dir: content
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # LOCALE
   # Regional formatting preferences
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   locale:
     date_format: "Jan 2, 2006"          # Go time format
     time_format: "3:04 PM"
     address_format: en-us
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # SECURITY
   # Security headers and policies (requires Netlify integration)
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   security:
     csp:
       policy: ""
@@ -262,18 +262,18 @@ hugoblox:
     frame_options: allow                 # deny | sameorigin | allow - allow enables iframe embedding
     permissions_policy: ""
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # PRIVACY
   # Privacy and compliance features
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   privacy:
     enable: false
     anonymize_analytics: true
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # DEBUG
   # Development and debugging (hidden in production)
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   debug:
     enable: false
     hud:
@@ -281,10 +281,10 @@ hugoblox:
       opacity: 1.0
     export_logs: true
 
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   # PREMIUM
   # Premium features and creator program (affiliates)
-  # ────────────────────────────────────────────────────────────────────────────
+  # ----------------------------------------------------------------------------
   pro:
     # Hide "Powered by HugoBlox" attribution
     # Requires: HugoBlox Premium to support HugoBlox via alternative means

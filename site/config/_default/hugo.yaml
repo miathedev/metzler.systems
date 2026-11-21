@@ -40,9 +40,9 @@ outputFormats:
     rel: alternate
   # .md-Mirror fuer jede Seite (LLM-/Agent-Konsum): /about/ -> /about/index.md
   # Invariante: jede Seite (page, section, taxonomy, term, home) existiert
-  # doppelt — als HTML und als /index.md. Templates: layouts/index.md.md und
-  # layouts/_default/*.md.md, rendern .RawContent — Shortcodes (z.B. {{< email >}})
-  # bleiben roh, dafuer bleiben Markdown-Struktur und Tabellen erhalten;
+  # doppelt, als HTML und als /index.md. Templates: layouts/index.md.md und
+  # layouts/_default/*.md.md, rendern .RawContent, Shortcodes (z.B. {{< email >}})
+  # bleiben roh, dafuer bleiben Markdown-Struktur und Tabellen erhalten,
   # Front-Matter fehlt im .md. Head-Hook layouts/_partials/hooks/head-start/
   # md-alternate.html verlinkt den Mirror als <link rel="alternate">.
   md:
@@ -73,6 +73,13 @@ taxonomies:
   publication_type: publication_types
 markup:
   _merge: deep
+  goldmark:
+    extensions:
+      typographer:
+        # kein Smartypants: ASCII bleibt ASCII (kein -> zu Pfeil, kein (c)
+        # zu Copyright-Zeichen, keine Gedankenstriche, keine Smart Quotes).
+        # Passt zum Pre-Commit-Check "typography".
+        disable: true
   highlight:
     lineNos: false
 security:

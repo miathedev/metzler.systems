@@ -204,9 +204,9 @@
                 {{ if $start }}
                   {{ $parsed := try (time $start) }}
                   {{ if not $parsed.Err }}
-                    {{ $parsed.Value | time.Format $date_format }} –
+                    {{ $parsed.Value | time.Format $date_format }} -
                   {{ else }}
-                    {{ $start }} –
+                    {{ $start }} -
                   {{ end }}
                 {{ end }}
                 {{ if $end }}
@@ -337,9 +337,9 @@
                 {{ if $start }}
                   {{ $parsed := try (time $start) }}
                   {{ if not $parsed.Err }}
-                    {{ $parsed.Value | time.Format $date_format }} –
+                    {{ $parsed.Value | time.Format $date_format }} -
                   {{ else }}
-                    {{ $start }} –
+                    {{ $start }} -
                   {{ end }}
                 {{ end }}
                 {{ if $end }}

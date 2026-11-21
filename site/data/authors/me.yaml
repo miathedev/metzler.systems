@@ -13,7 +13,7 @@ bio: |
   Strong in observability (Prometheus, Grafana, Loki, Mimir) and security hardening
   (PKI, Vault, MFA). Embedded experience via Rust (CAN-FD) and LoRa sensor networks.
   Based in the DE/CH border region (Küssaberg, DE, 5 minutes from Bad Zurzach) with a
-  G permit (DE→CH). Open to full-time or contract roles.
+  G permit (DE->CH). Open to full-time or contract roles.
 
 affiliations:
   - name: bpm consult ag
@@ -48,7 +48,7 @@ education:
       Thesis (grade 1.3): feasibility study on provisioning a modular DevOps
       toolchain infrastructure using Helm (advisor: Prof. Dr.-Ing. Evren Eren).
       Installed and maintained a large Kubernetes cluster for academic research.
-  - degree: Semester abroad — IoT & Embedded Systems
+  - degree: Semester abroad, IoT & Embedded Systems
     institution: University of Salerno
     start: 2023-02-01
     end: 2023-07-31
@@ -74,10 +74,10 @@ experience:
     start: 2023-06-01
     summary: |
       Migrated production infrastructure from Google Cloud to a cost-efficient
-      self-hosted Kubernetes cluster; HA SaaS environments with automated failover and
-      load balancing; PHP/Laravel apps with RabbitMQ and MongoDB ported into the
-      cluster; Prometheus/Grafana/Loki monitoring; shift-left security scans in GitLab
-      CI/CD; Ansible/Bash automation; SD-WAN and corporate networks. Since April 2024 I
+      self-hosted Kubernetes cluster, HA SaaS environments with automated failover and
+      load balancing, PHP/Laravel apps with RabbitMQ and MongoDB ported into the
+      cluster, Prometheus/Grafana/Loki monitoring, shift-left security scans in GitLab
+      CI/CD, Ansible/Bash automation, SD-WAN and corporate networks. Since April 2024 I
       keep operating the migrated cluster as a freelancer.
   - role: DevOps and Embedded Systems
     org: engram GmbH
@@ -85,9 +85,9 @@ experience:
     end: 2023-01-31
     summary: |
       Migrated branch display systems (digital signage, customer guidance) from
-      Windows to Linux — replacing costly Windows licences. CI/CD pipelines, QA
+      Windows to Linux, replacing costly Windows licences. CI/CD pipelines, QA
       processes, deployment strategies for display hardware and cloud environments.
-  - role: Working Student — DevOps
+  - role: Working Student, DevOps
     org: hmmh multimediahaus AG
     start: 2018-10-01
     end: 2019-11-30
@@ -108,7 +108,7 @@ skills:
         level: 4
   - name: OS & Automation
     items:
-      - label: Linux (Debian, Ubuntu, SLES) — +10 years
+      - label: Linux (Debian, Ubuntu, SLES), +10 years
         level: 5
       - label: Ansible
         level: 3
@@ -138,7 +138,7 @@ skills:
         level: 3
       - label: SD-WAN, firewalls, HA reverse proxies
         level: 4
-      - label: Git — +10 years, daily tool
+      - label: Git, +10 years, daily tool
         level: 5
 
 languages:
@@ -150,8 +150,8 @@ languages:
     label: Fluent
 
 awards:
-  - name: KCNA — Kubernetes and Cloud Native Associate (passed)
+  - name: KCNA, Kubernetes and Cloud Native Associate (passed)
     institution: Linux Foundation
-  - name: CKA — Certified Kubernetes Administrator (in preparation, end of 2026)
+  - name: CKA, Certified Kubernetes Administrator (in preparation, end of 2026)
     institution: Linux Foundation
     date: 2026-12-31

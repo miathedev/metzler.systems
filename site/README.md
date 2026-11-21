@@ -1,14 +1,14 @@
-# site/ — HugoBlox Developer Portfolio
+# site/, HugoBlox Developer Portfolio
 
 Statischer Source der Website `metzler.systems`. Hugo rendert daraus einmalig
-statische Dateien nach `public/` (gitignored) — im Cluster serviert sie ein
+statische Dateien nach `public/` (gitignored), im Cluster serviert sie ein
 rootless nginx.
 
 ## Voraussetzungen
 
 - hugo **extended** (v0.162.0): `hugo version` muss `+extended` zeigen
 - Go (für Hugo Modules, `go.mod`/`go.sum`)
-- node + pnpm (`pnpm install` installiert `tailwindcss` CLI + `preact` —
+- node + pnpm (`pnpm install` installiert `tailwindcss` CLI + `preact` -
   beides braucht der Build und liegt in `node_modules/.bin`)
 
 ## Lokal entwickeln
@@ -53,4 +53,4 @@ hugo mod get github.com/HugoBlox/kit/modules/blox@latest
 hugo mod tidy
 ```
 
-Danach `hugo --minify` testen — Layout-Overrides in `layouts/` bleiben erhalten.
+Danach `hugo --minify` testen, Layout-Overrides in `layouts/` bleiben erhalten.

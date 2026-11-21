@@ -1,7 +1,7 @@
 ---
 title: "New single: Genosse"
 date: 2026-11-17
-summary: "My new single \"Genosse\" (as Ma Paix) is out on Bandcamp — one track, released 13 June 2026. Listen below."
+summary: "My new single \"Genosse\" (as Ma Paix) is out on Bandcamp, one track, released 13 June 2026. Listen below."
 tags:
   - Music
   - Bandcamp
@@ -12,7 +12,7 @@ featured: true
 weight: 1
 ---
 
-New single out: Genosse — one track, released 13 June 2026 on Bandcamp as [Ma Paix](https://mapaix.bandcamp.com/album/genosse).
+New single out: Genosse, one track, released 13 June 2026 on Bandcamp as [Ma Paix](https://mapaix.bandcamp.com/album/genosse).
 
 {{< bandcamp album="2004128651" >}}
 

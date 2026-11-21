@@ -22,10 +22,15 @@ Aktuelle Checks:
 * `pre-commit`: gitleaks-Scan der gestageten Aenderungen (wird beim ersten
   Lauf automatisch als gepinnte Version nach `.bin/` installiert)
 * `commit-msg`: Commit-Style (siehe unten)
+* `typography`: Text-Inhalte (`site/content/`, `site/data/`, `site/config/`,
+  READMEs) enthalten keine Semikola und keine Nicht-ASCII-Zeichen, ausser
+  Buchstaben mit Diakritika und `§` in Gesetzeszitaten. Code-Fences in
+  Markdown sind ausgenommen (dort sind z.B. Shell-Semikola legitim).
+  Auslassen mit `SKIP=typography git commit ...`
 
 ## Commit-Style
 
-`<Topic>: <beschreibung>` — z.B. `Fix: kyverno admission ...` oder
+`<Topic>: <beschreibung>`, z.B. `Fix: kyverno admission ...` oder
 `chore(website): image auf <sha> [skip ci]`. Topic ist ein Wort aus Buchstaben
 und Ziffern, optional mit Scope in Klammern. Merge-, `fixup!`- und
 `squash!`-Commits sind ausgenommen. Erzwungen durch `.githooks/commit-msg`

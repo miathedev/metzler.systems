@@ -46,6 +46,11 @@ GITLEAKS_VERSION="8.30.1"
 # optional mit Scope in Klammern. Merge-/fixup-/squash!-Commits siehe
 # check_commit_msg.
 COMMIT_MSG_PATTERN='^[A-Za-z][A-Za-z0-9_-]*(\([A-Za-z0-9_./-]+\))?: .+'
+# Verboten in Text-Inhalten (siehe check_typography): ";" (ausser als Teil
+# eines HTML-Entities wie &amp;), jedes Nicht-ASCII-Zeichen ausser Buchstaben
+# mit Diakritika (ae/oe/ue/ss/...) und dem Paragraph-Zeichen, sowie Entities,
+# die auf solche Zeichen rendern (&mdash; usw.).
+TYPO_PATTERN='(?<!&[A-Za-z0-9#]{1,10});|[^\x00-\x7F\x{00A7}\x{00C0}-\x{00D6}\x{00D8}-\x{00F6}\x{00F8}-\x{00FF}]|&(?i:mdash|ndash|rarr|hellip|lsquo|rsquo|ldquo|rdquo|nbsp);'
 # Repo-lokales Verzeichnis fuer auto-installierte Tools (gitignored via .bin/).
 LOCAL_BIN="$REPO_ROOT/.bin"
 
@@ -151,11 +156,57 @@ check_commit_msg() {
 }
 
 # ---------------------------------------------------------------------------
+# typography — Text-Inhalte duerfen weder Semikola noch Nicht-ASCII-Zeichen
+# enthalten (ausser Buchstaben mit Diakritika und Paragraph-Zeichen).
+# Scannt die gestageten Versionen von site/content/, site/data/,
+# site/config/ und den READMEs; Code-Fences in Markdown (``` / ~~~) werden
+# ausgelassen, weil dort z.B. Shell-Semikola legitim sind.
+# ---------------------------------------------------------------------------
+
+check_typography() {
+  local files f out hits=0
+  if git diff --cached --quiet; then
+    echo "  keine gestageten Aenderungen, Scan uebersprungen"
+    return 0
+  fi
+  files="$(git diff --cached --name-only --diff-filter=ACM \
+           | grep -E '^(README\.md|site/README\.md|site/content/.*\.md|site/data/.*\.yaml|site/config/.*\.yaml)$' \
+           || true)"
+  if [[ -z "$files" ]]; then
+    echo "  keine Text-Dateien unter den gestageten Aenderungen"
+    return 0
+  fi
+  while IFS= read -r f; do
+    if [[ "$f" == *.md ]]; then
+      out="$(git show ":$f" | LC_ALL=C.UTF-8 awk '
+               /^[[:space:]]*(```|~~~)/ { fence = !fence; next }
+               !fence
+             ' | LC_ALL=C.UTF-8 grep -nP "$TYPO_PATTERN" | sed "s|^|$f:|")"
+    else
+      out="$(git show ":$f" | LC_ALL=C.UTF-8 grep -nP "$TYPO_PATTERN" | sed "s|^|$f:|")"
+    fi
+    if [[ -n "$out" ]]; then
+      echo "$out"
+      hits=1
+    fi
+  done <<< "$files"
+  if ((hits)); then
+    {
+      echo "  verboten in Text-Inhalten: Semikolon und Nicht-ASCII-Zeichen."
+      echo "  erlaubt: ASCII, Buchstaben mit Diakritika (ae/oe/ue/ss/...) und das Paragraph-Zeichen"
+    } >&2
+    return 1
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Check-Registry — hier landen kuenftig weitere Checks
 # ---------------------------------------------------------------------------
 
 CHECKS=(
   check_gitleaks
+  check_typography
 )
 
 # Der pre-commit-Hook sieht die Commit-Message nicht — die prueft der

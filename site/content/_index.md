@@ -127,13 +127,13 @@ sections:
           date_start: '2024-04-01'
           date_end: ''
           description: |2-
-            * Platform behind beeline — ERP & e-commerce for the book/media trade, 50+ online shops on Linux, KVM and InterSystems IRIS
+            * Platform behind beeline, ERP & e-commerce for the book/media trade, 50+ online shops on Linux, KVM and InterSystems IRIS
             * Lead Linux system administrator of the entire data centre, incl. incident response for critical outages
-            * Observability stack: Prometheus/Mimir, Loki, Alertmanager, OpenTelemetry, IPMI — data-driven root-cause analysis
+            * Observability stack: Prometheus/Mimir, Loki, Alertmanager, OpenTelemetry, IPMI, data-driven root-cause analysis
             * Highly available active/active container platform with CI/CD, central logging and backups
             * Security hardening: internal PKI with offline root CA, HashiCorp Vault, hardware-key MFA, credential rotation, blameless postmortems
             * Tech stack: Linux, Ansible, Python, GitLab CI/CD, Prometheus, Grafana, Vault
-        - title: Infrastructure Engineer — freelance cluster operation since Apr 2024
+        - title: Infrastructure Engineer, freelance cluster operation since Apr 2024
           company: Leo Skull GmbH
           company_url: ''
           company_logo: ''
@@ -142,10 +142,10 @@ sections:
           date_end: ''
           description: |2-
             * Migrated production infrastructure from Google Cloud to a cost-efficient self-hosted Kubernetes cluster
-            * HA SaaS environments with automated failover and load balancing; PHP/Laravel apps with RabbitMQ and MongoDB ported into the cluster
-            * Monitoring with Prometheus, Grafana, Loki; shift-left security scans in GitLab CI/CD
+            * HA SaaS environments with automated failover and load balancing, PHP/Laravel apps with RabbitMQ and MongoDB ported into the cluster
+            * Monitoring with Prometheus, Grafana, Loki, shift-left security scans in GitLab CI/CD
             * Architecture and operation of SD-WAN and corporate networks
-            * Since 04/2024: freelance operation of the migrated cluster — maintenance, consulting, support
+            * Since 04/2024: freelance operation of the migrated cluster, maintenance, consulting, support
             * Tech stack: Kubernetes, Docker, Ansible, Bash, Python, GitLab CI/CD
         - title: DevOps and Embedded Systems
           company: engram GmbH
@@ -155,10 +155,10 @@ sections:
           date_start: '2019-01-01'
           date_end: '2023-01-31'
           description: |2-
-            * Migrated branch display systems (digital signage, customer guidance) from Windows to Linux — replacing costly Windows licences
-            * Build and optimisation of CI/CD pipelines; QA processes; deployment strategies for display hardware and cloud environments
+            * Migrated branch display systems (digital signage, customer guidance) from Windows to Linux, replacing costly Windows licences
+            * Build and optimisation of CI/CD pipelines, QA processes, deployment strategies for display hardware and cloud environments
             * Tech stack: Linux, CI/CD, deployment automation
-        - title: Working Student — DevOps
+        - title: Working Student, DevOps
           company: hmmh multimediahaus AG
           company_url: ''
           company_logo: ''
@@ -167,7 +167,7 @@ sections:
           date_end: '2019-11-30'
           description: |2-
             * Jenkins CI/CD maintenance and modernisation (pipeline parallelisation)
-            * JUnit4 to JUnit5 migration; bugfixing in a production Java/Spring e-commerce platform
+            * JUnit4 to JUnit5 migration, bugfixing in a production Java/Spring e-commerce platform
             * Tech stack: Jenkins, Java, Spring, JUnit
     design:
       columns: '1'
@@ -198,10 +198,10 @@ sections:
     id: contact
     content:
       title: Get in touch
-      subtitle: "Hiring for a Kubernetes, DevOps or SRE role? Let's talk — e-mail: {{< email >}}"
+      subtitle: "Hiring for a Kubernetes, DevOps or SRE role? Let's talk, e-mail: {{< email >}}"
       text: |-
-        I'm based in the DE/CH border region — Küssaberg (DE), 5 minutes from
-        Bad Zurzach, with a valid G permit (DE→CH) — and open to full-time or contract
+        I'm based in the DE/CH border region, Küssaberg (DE), 5 minutes from
+        Bad Zurzach, with a valid G permit (DE->CH), and open to full-time or contract
         roles. You can also find me on GitHub, LinkedIn and Bandcamp (see Links).
     design:
       columns: '1'
