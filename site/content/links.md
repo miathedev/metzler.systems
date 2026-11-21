@@ -31,3 +31,4 @@ Just links. Everything below is mine.
 | BodenSynth, Bodensee Synthesizer Meetup | <https://bodensynth.org/> |
 | Hackerspace Odenwilusenz (Beringen SH) | <https://odenwilusenz.ch/> |
 | Chaos Computer Club Schweiz | <https://ccc-ch.ch/> |
+| Schauplatz Lauchringen e.V. (common visitor, not yet member) | https://www.schauplatz-lauchringen.de/ |
