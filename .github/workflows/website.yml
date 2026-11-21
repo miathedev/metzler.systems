@@ -4,6 +4,7 @@ name: website-image
 # Auslöser: Änderungen an site/ (oder diesem Workflow).
 # Der Job bumped am Ende den image.tag in charts/website/values.yaml
 # auf den SHA des Commits — Flux/ArgoCD deployt von dort.
+# Action-Versionen (@v7 usw.) pinnt Renovate per Commit-SHA (siehe renovate.json).
 
 on:
   push:
@@ -57,9 +58,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            HUGO_VERSION=0.170.0
-            PNPM_VERSION=10.14.0
+          # Build-Versionen (HUGO_VERSION) leben nur in site/Dockerfile —
+          # Renovate aktualisiert sie dort per PR (siehe renovate.json).
 
       - name: ghcr-Package public machen (Repo ist public)
         continue-on-error: true
@@ -86,3 +86,22 @@ jobs:
           git add charts/website/values.yaml charts/website/Chart.yaml
           git commit -m "Chore(website): image auf ${{ github.sha }} [skip ci]" || echo "tag bereits aktuell, nichts zu committen"
           git push
+
+  scan:
+    name: Trivy-Scan (report-only)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Image-Ref aufloesen
+        id: img
+        run: echo "ref=ghcr.io/${{ github.repository }}/website:sha-$(echo '${{ github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy-Scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.img.outputs.ref }}
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'  # report-only: Findings landen im Log, brechen den Build nicht

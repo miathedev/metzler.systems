@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    "customManagers:dockerfileVersions"
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["gohugoio/hugo"],
+      "commitMessageTopic": "hugo",
+      "automerge": false
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["patch", "minor", "pin", "digest"],
+      "minimumReleaseAge": "14 days",
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "minimumReleaseAge": "14 days",
+      "automerge": true
+    }
+  ]
+}

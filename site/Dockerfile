@@ -1,19 +1,20 @@
+# syntax=docker/dockerfile:1
+
 # Bau Stage
-ARG HUGO_VERSION=0.170.0
-# Muss zur packageManager-Angabe in package.json und zum pnpm-lock.yaml passen!
-ARG PNPM_VERSION=10.14.0
+# renovate: datasource=github-releases depName=gohugoio/hugo
+ARG HUGO_VERSION=0.170.1
 
 FROM node:24-alpine AS build
 ARG HUGO_VERSION
-ARG PNPM_VERSION
 
+# Ab Hugo 0.170.0 gibt es nur noch ein Binary ("extended" ist als Alias entfallen).
 RUN apk add --no-cache go git curl tar \
- && curl -fsSL -o /tmp/hugo.tgz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz" \
+ && curl -fsSL -o /tmp/hugo.tgz "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_linux-amd64.tar.gz" \
  && tar -xzf /tmp/hugo.tgz -C /usr/local/bin \
  && rm /tmp/hugo.tgz \
  && hugo version \
- && corepack enable \
- && corepack prepare pnpm@${PNPM_VERSION} --activate
+ && corepack enable
+# pnpm-Version kommt allein aus dem packageManager-Feld in package.json (corepack).
 
 WORKDIR /src
 # hugo findet tailwindcss nur über PATH
@@ -28,6 +29,6 @@ COPY . .
 RUN hugo --minify
 
 # Letzte Stage
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginx/nginx-unprivileged:1.30-alpine
 COPY --from=build /src/public/ /usr/share/nginx/html/
 EXPOSE 8080
