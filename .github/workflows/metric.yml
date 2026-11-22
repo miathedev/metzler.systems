@@ -1,0 +1,176 @@
+# metric.yml: baut das metric-Image, pusht es nach ghcr.io und bumped den Chart-Tag
+# in charts/metric/values.yaml auf den Commit-SHA — der Bump passiert aber erst im
+# Job bump-tag, NACHDEM der Trivy-Image-Scan (scan) gruen ist. Flux deployt
+# dadurch nie ein Image mit CRITICAL-Findings.
+name: metric-image
+
+# Auslöser: Änderungen an apps/metric/ (oder diesem Workflow).
+# Actions sind auf Commit-SHA gepinnt (immutable); Renovate aktualisiert die
+# SHAs automatisch (pinDigests in renovate.json).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/metric/**'
+      - 'charts/metric/**'
+      - 'dev/values/metric.yaml'
+      - '.github/workflows/metric.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # bump-tag: Tag-Bump-Commit in charts/metric/values.yaml
+  packages: write   # Push nach ghcr.io
+
+concurrency:
+  group: metric-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint + Unit-Tests + Helm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      - name: Python einrichten
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1  # v6
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: apps/metric/requirements-dev.txt
+
+      - name: Dev-Dependencies installieren (gepinnt + Hashes)
+        run: pip install -r apps/metric/requirements-dev.txt
+
+      - name: Trivy-Scan (Source/Dependencies, vor dem Image-Push)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: apps/metric
+          severity: CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+
+      - name: ruff + vulture
+        working-directory: apps/metric
+        run: |
+          ruff check .
+          vulture app whitelist_vulture.py
+
+      - name: pytest (Coverage-Floor 70 %, gleicher Wert wie dev/run-tests.sh)
+        working-directory: apps/metric
+        run: python -m pytest tests -q --cov=app --cov-report=term-missing --cov-fail-under=70
+
+      - name: Helm einrichten
+        # renovate: datasource=github-tags depName=azure/setup-helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4  # v4
+
+      - name: helm lint + template (prod-Defaults und dev-values)
+        run: |
+          helm lint charts/metric
+          helm template metric charts/metric -n website > /dev/null
+          helm template metric charts/metric -n website -f dev/values/metric.yaml > /dev/null
+
+  build-and-push:
+    # Erst pushen, wenn lint/tests/helm grün sind — kaputter Code landet so
+    # nie als Image auf ghcr.io. Der Tag-Bump passiert absichtlich NICHT hier,
+    # sondern erst in bump-tag nach dem Image-Scan (scan).
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      # pusht nie selbst in den Branch — nur bump-tag braucht contents: write
+      contents: read
+      packages: write   # Push nach ghcr.io
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      - name: Docker Buildx einrichten
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4
+
+      - name: Login ghcr.io
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550  # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Tags erzeugen (sha + latest auf main)
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6
+        with:
+          images: ghcr.io/${{ github.repository }}/metric
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Image bauen und pushen
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7
+        with:
+          context: apps/metric
+          file: apps/metric/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: ghcr-Package public machen (Repo ist public)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PACKAGE=$(echo '${{ github.repository }}/metric' | sed 's|/|%2F|')
+          gh api -X PATCH "/user/packages/container/${PACKAGE}/visibility" -f visibility=public \
+            || gh api -X PATCH "/orgs/${{ github.repository_owner }}/packages/container/${PACKAGE}/visibility" -f visibility=public \
+            || echo "Konnte Sichtbarkeit nicht per API setzen — einmal manuell in GitHub unter Packages auf public stellen"
+
+  scan:
+    name: Trivy-Scan (CRITICAL blockiert den Tag-Bump)
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Image-Ref aufloesen
+        id: img
+        run: echo "ref=ghcr.io/${{ github.repository }}/metric:sha-$(echo '${{ github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy-Scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          image-ref: ${{ steps.img.outputs.ref }}
+          format: table
+          severity: CRITICAL
+          exit-code: '1'  # CRITICAL blockiert: bump-tag (und damit Flux) sieht nur gescannte Images
+          ignore-unfixed: true
+
+  bump-tag:
+    name: Chart-Tag auf Commit-SHA aktualisieren
+    needs: scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+
+      - name: image.tag im Chart automatisiert auf Commit-SHA aktualisieren
+        run: |
+          # metadata-action pusht type=sha,format=short -> Tag "sha-<7 Zeichen>".
+          # Der Chart-Tag muss exakt dazu passen, sonst schlaegt der Image-Pull fehl.
+          SHORT_SHA=$(echo '${{ github.sha }}' | cut -c1-7)
+          yq -i ".image.repository = \"ghcr.io/${{ github.repository }}/metric\" | .image.tag = \"sha-${SHORT_SHA}\"" charts/metric/values.yaml
+          # Chart-Version mitbumpen: helm-controller cacht Charts am Version-String
+          # und wuerde sonst trotz neuem values.yaml-Tag das alte Chart deployen.
+          yq -i ".version = \"0.1.${{ github.run_number }}\"" charts/metric/Chart.yaml
+          git config user.name "github-actions[bot]"
+          # https://github.com/orgs/community/discussions/26560
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add charts/metric/values.yaml charts/metric/Chart.yaml
+          git commit -m "Chore(metric): image auf ${{ github.sha }} [skip ci]" || echo "tag bereits aktuell, nichts zu committen"
+          git push

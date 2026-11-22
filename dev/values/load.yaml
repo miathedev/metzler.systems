@@ -1,0 +1,50 @@
+# Lokale Overrides fuer charts/load (genutzt von dev/setup.sh und
+# dev/dev-image.sh).
+image:
+  # Wird lokal gebaut (docker build apps/load/) und per `kind load
+  # docker-image` in den kind-Cluster geladen — nie von ghcr gepullt, damit
+  # lokale Aenderungen getestet werden (pullPolicy: Never).
+  tag: "dev"
+  pullPolicy: Never
+ingress:
+  # Kein cert-manager im kind: das TLS-Secret load-tls wird von setup.sh
+  # aus dem mkcert-Cert erzeugt, die cert-manager-Annotation muss weg.
+  # cert-manager.io/cluster-issuer auf null, weil Helm -f-Maps merged (sonst
+  # bleibt letsencrypt-prod stehen). Die StripPrefix-Middleware kommt aus dem
+  # Chart selbst (templates/middleware.yaml + Ingress-Default-Annotation).
+  annotations:
+    cert-manager.io/cluster-issuer: null
+  # Lokal grosszuegiger als prod (3/10min), damit man beim Testen nicht ausgesperrt wird
+  rateLimit:
+    average: 100
+    burst: 100
+    period: 60s
+# Load-Demo lokal: 5 Minuten k6 gegen die website, 1500 rps — damit skaliert
+# der HPA (max 10) sichtbar hoch. Das k6-Image (grafana/k6) kommt public von
+# Docker Hub und wird im kind ganz normal gepullt.
+env:
+  LOAD_TARGET_URL: "http://website:8080/"
+  LOAD_DURATION_S: "300"
+  LOAD_RATE: "1500"
+  LOAD_VUS: "150"
+  LOAD_MAX_VUS: "800"
+  # Dev laeuft auf Port 8443 — der Browser-Origin enthaelt den Port mit
+  LOAD_ALLOWED_ORIGINS: "https://metzler.systems,https://metzler.systems:8443"
+k6:
+  resources:
+    # k6 (Go) ist effizient; im kind single-node hoeher, damit der Job selbst
+    # nicht zum Bottleneck wird, bevor die website skaliert.
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 1Gi
+resources:
+  # App-Pod bleibt duenn (Job-Orchestrierung), siehe Chart-Default.
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi

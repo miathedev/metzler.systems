@@ -1,0 +1,92 @@
+# networkpolicy.yaml: default-deny fuer die load-App UND die k6-Run-Jobs.
+# App-Pods: Ingress nur von Traefik, Egress nur DNS + K8s-API (jobs anlegen).
+# Run-Job-Pods (Label app.kubernetes.io/component=load-run): gar kein Ingress,
+# Egress nur DNS + website-Service im selben Namespace (das k6-Ziel, Port 8080).
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "load.fullname" . }}-default-deny
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "load.selectorLabels" . | nindent 6 }}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+    # helm-test-Pods (tests/test-connection.yaml) duerfen den Service wgetten.
+    - from:
+        - podSelector:
+            matchLabels:
+              metzler.systems/helm-test: "true"
+      ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # K8s-API (batch/jobs anlegen + pods/log lesen) ueber den `kubernetes`-Service
+    # (default-Namespace, keine Pod-IPs — deshalb ipBlock statt namespaceSelector).
+    # CIDRs/Ports kommen aus values (networkPolicy.k8sApiCIDRs/k8sApiPorts): in
+    # prod auf die API-Endpunkt-IP des Clusters einschraenken (siehe
+    # flux/cluster/infomaniak/releases.yaml), dev bleibt breit (siehe values).
+    - to:
+        {{- range .Values.networkPolicy.k8sApiCIDRs }}
+        - ipBlock:
+            cidr: {{ . | quote }}
+        {{- end }}
+      ports:
+        {{- range .Values.networkPolicy.k8sApiPorts }}
+        - port: {{ . }}
+          protocol: TCP
+        {{- end }}
+---
+# k6-Run-Jobs: kein Ingress, Egress nur DNS + website-Service (gleicher
+# Namespace, Port 8080 = service.port des website-Charts)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "load.fullname" . }}-run-jobs
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: load
+      app.kubernetes.io/component: load-run
+  policyTypes: ["Ingress", "Egress"]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+          # Nur die website-Pods (das k6-Ziel) — nicht alle Pods im Namespace.
+          # namespaceSelector + podSelector im selben Peer werden UND-verknuepft.
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: website
+      ports:
+        - port: 8080
+          protocol: TCP
+{{- end }}

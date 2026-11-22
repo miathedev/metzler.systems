@@ -1,0 +1,14 @@
+{{/* NOTES.txt: Ausgabe nach helm install/upgrade von charts/metric — als
+Template-Kommentar, damit die Kopfzeile nicht 1:1 in der helm-Ausgabe landet. */}}
+1. Die Metrics-API ist erreichbar unter:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+{{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}/state
+{{- end }}
+{{- end }}
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "metric.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.service.port }}
+  http://127.0.0.1:8080/state
+{{- end }}

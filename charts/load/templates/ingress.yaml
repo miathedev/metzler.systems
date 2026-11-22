@@ -1,0 +1,92 @@
+# ingress.yaml: Prefix-Ingress /api/load (nur StripPrefix+Headers — Status-Polls
+# duerfen nicht ins RateLimit laufen) plus Exact-Trigger-Ingress /api/load/ mit
+# zusaetzlichem RateLimit. Kein eigener LoadBalancer: beide hängen am bestehenden
+# Traefik-LoadBalancer (Service traefik im Namespace traefik).
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "load.fullname" . }}
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+  annotations:
+    # Middlewares aus diesem Chart (templates/middleware.yaml) — ohne StripPrefix
+    # strippt Traefik bei pathType: Prefix nicht und die App antwortet 404.
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "load.fullname" . }}-stripprefix@kubernetescrd,{{ .Release.Namespace }}-{{ include "load.fullname" . }}-headers@kubernetescrd
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- with .pathType }}
+            pathType: {{ . }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "load.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+---
+# Trigger-Ingress (Exact /api/load/): zusaetzlich zum StripPrefix das
+# RateLimit — nur der oeffentliche POST zum Run-Start ist gedrosselt.
+# pathType Exact gewinnt gegen den Prefix oben, Status-Polls bleiben frei.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "load.fullname" . }}-trigger
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "load.fullname" . }}-stripprefix@kubernetescrd,{{ .Release.Namespace }}-{{ include "load.fullname" . }}-ratelimit@kubernetescrd,{{ .Release.Namespace }}-{{ include "load.fullname" . }}-headers@kubernetescrd
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: {{ $.Values.rootPath }}/
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "load.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+    {{- end }}
+{{- end }}

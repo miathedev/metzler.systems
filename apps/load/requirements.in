@@ -1,0 +1,5 @@
+# requirements.in: direkte Runtime-Abhaengigkeiten von apps/load — Quelle fuer
+# pip-compile -> requirements.txt (gepinnt mit sha256-Hashes).
+fastapi
+uvicorn
+kubernetes

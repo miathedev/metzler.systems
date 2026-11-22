@@ -1,0 +1,159 @@
+# Default values for load.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Bewusst 1: Single-State (ein aktiver k6-Run) wird ueber einen Prozess-Lock
+# in der App abgesichert (apps/load/app/k8s.py) — bei >1 Replica waeren zwei
+# Pods mit eigenem Lock und koennten doppelt feuern.
+replicaCount: 1
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  # Wird von .github/workflows/load.yml gebaut und via ghcr.io veröffentlicht.
+  # image.tag wird von der CI auf den jeweiligen Commit-SHA gebumpt (immutable tags).
+  repository: ghcr.io/miathedev/metzler.systems/load
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # "latest" existiert ab dem ersten CI-Lauf auf main, danach bumped die CI
+  # auf sha-<commit> (immutable tags). appVersion als Fallback würde auf ein
+  # nie gepushtes Image zeigen.
+  tag: "sha-345fec4"
+# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+# Oeffentliches Präfix des Ingress. uvicorn --root-path wird darueber gesetzt
+# (nur Logging/URL-Generierung, strippt NICHT selbst), das eigentliche Stripping
+# macht die StripPrefix-Middleware aus templates/middleware.yaml.
+rootPath: /api/load
+# Load-Run: Ziel (website-Service im selben Namespace), Dauer und k6-Rate/VUs.
+# Env wird 1:1 als name/value-Liste ins Deployment gerendert; die k6-Job-Details
+# (Image/ConfigMap/Ressourcen) haengt die App zusaetzlich aus values.k6 an.
+env:
+  LOAD_TARGET_URL: "http://website:8080/"
+  LOAD_DURATION_S: "300"
+  LOAD_RATE: "1000"
+  LOAD_VUS: "100"
+  LOAD_MAX_VUS: "600"
+  # CSRF: erlaubte Origins fuer POST /api/load/ (Browser schicken Origin mit)
+  LOAD_ALLOWED_ORIGINS: "https://metzler.systems"
+# k6-Run-Job: wird von der App pro Load-Run als batch/v1-Job erstellt
+# (Script als ConfigMap <fullname>-k6 aus templates/k6-script-configmap.yaml).
+k6:
+  # renovate: datasource=docker depName=grafana/k6 (Digest-Pin via renovate.json)
+  image: grafana/k6:2.4.0@sha256:d41bb79cd8de5a7ad619b53570e3712633e8bff0937010a5c6c57a4747e7a276
+  # leer = Default <fullname>-k6 (ConfigMap oben)
+  scriptConfigMap: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+#This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Die load-App erstellt/liest nur batch/jobs im eigenen Namespace (rbac.yaml).
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  # annotations:
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+# This is for setting Kubernetes Annotations to a Pod.
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+podLabels: {}
+podSecurityContext:
+  fsGroup: 101
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  #Droppe alle Capabilities, wir benötigen keine
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  allowPrivilegeEscalation: false
+  # Die App schreibt nichts auf die Platte (PYTHONDONTWRITEBYTECODE im Image)
+  readOnlyRootFilesystem: true
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# ClusterIP bewusst: der bestehende Traefik-LoadBalancer (Namespace traefik) wird
+# per Ingress wiederverwendet, ein eigener LoadBalancer würde extra kosten.
+service:
+  type: ClusterIP
+  port: 8080
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  # Traefik-RateLimit (Middleware in templates/middleware.yaml) pro Client-IP
+  # auf dem oeffentlichen POST /api/load/ — gilt nur fuer den Exact-Trigger-
+  # Ingress (templates/ingress.yaml), NICHT fuer GET /status (Frontend pollt
+  # alle 2 s): 3 Trigger pro 10 min sustained, dazu burst 3. Ergaenzt das
+  # In-App-Limit (apps/load: 3/10min) am Ingress — dort zaehlt die echte
+  # Client-IP (ipStrategy depth 1), nicht spoofbares XFF.
+  rateLimit:
+    average: 3
+    burst: 3
+    period: 600s
+  hosts:
+    - host: metzler.systems
+      paths:
+        - path: /api/load
+          pathType: Prefix
+  tls:
+    - secretName: load-tls
+      hosts:
+        - metzler.systems
+resources:
+  # Die load-App selbst ist duenn (nur Job-Orchestrierung); die Last erzeugt
+  # der k6-Run-Job (Ressourcen siehe values.k6.resources).
+  limits:
+    cpu: 250m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Probes zeigen auf /health (ohne Ziel-Abhängigkeit), nicht auf /status.
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+# Zusätzliche Volumes und Mounts
+volumes: []
+volumeMounts: []
+# NetworkPolicy (templates/networkpolicy.yaml): default-deny fuer App-Pods
+# (Ingress nur Traefik, Egress DNS + K8s-API) und fuer die k6-Run-Jobs
+# (kein Ingress, Egress nur DNS + website-Service).
+networkPolicy:
+  enabled: true
+  # Egress zur K8s-API: default breit (0.0.0.0/0, Port 443), weil der
+  # API-Endpunkt des Clusters nicht statisch im Chart stehen kann. In prod
+  # pinnt die HelmRelease per valuesFrom das Secret `k8s-api-endpoint`
+  # (CIDRs + Ports des API-Endpunkts, Anti-Exfiltration). Dev/kind behaelt
+  # 0.0.0.0/0 (Node-IP wechselt).
+  k8sApiCIDRs:
+    - 0.0.0.0/0
+  # Ports des API-Endpunkts: 443 = Port des `kubernetes`-Service. CNIs, die
+  # Egress-Policies nach DNAT auswerten (Calico), brauchen zusaetzlich den
+  # targetPort des Service — in prod setzt das Secret `k8s-api-endpoint`
+  # beides (siehe HelmRelease valuesFrom).
+  k8sApiPorts:
+    - 443
+nodeSelector: {}
+tolerations: []
+affinity: {}

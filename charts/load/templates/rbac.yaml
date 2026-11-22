@@ -1,0 +1,37 @@
+# Strikt namespaced: die load-App erstellt/liest nur batch/jobs im eigenen
+# Namespace (website) — die k6-Run-Jobs — und liest deren Pod-Logs (pods/log),
+# um die k6-Summary als echte Metriken fuer /status zu parsen. Bewusst keine
+# weiteren Rechte; die website skaliert der HPA, den liest die metric-App.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "load.fullname" . }}
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  # pods list/get: Pod des Run-Jobs finden (Label job-name); pods/log get:
+  # k6-Summary aus dem Job-Log parsen
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "load.fullname" . }}
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "load.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "load.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}

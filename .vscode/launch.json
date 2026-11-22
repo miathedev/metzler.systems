@@ -1,0 +1,29 @@
+// launch.json — FastAPI-Apps lokal debuggen. Spiegelt den Docker-ENTRYPOINT
+// (uvicorn main:app mit WORKDIR app/), nutzt aber den venv-Interpreter, den
+// dev/run-tests.sh unter .bin/ anlegt. K8s-Calls der Apps gehen gegen den
+// aktiven kubectl-Kontext (nach dev/setup.sh: kind-dev).
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "load (uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/.bin/venv-load/bin/python",
+      "args": ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8001"],
+      "cwd": "${workspaceFolder}/apps/load/app",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "metric (uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/.bin/venv-metric/bin/python",
+      "args": ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8002"],
+      "cwd": "${workspaceFolder}/apps/metric/app",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

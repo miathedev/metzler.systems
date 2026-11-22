@@ -34,6 +34,20 @@ sections:
       spacing:
         padding: ["6rem", "0", "4rem", "0"]
 
+  # Live-Cluster-Metriken - Eye-Catcher, zur Laufzeit von der Metrics-API gespeist
+  - block: live-metrics
+    id: live
+    content:
+      title: "Live metrics"
+      # subtitle: "Streams metrics API in realtime"
+      endpoint: /api/metrics/state
+      stream_endpoint: /api/metrics/stream
+      poll_seconds: 3
+      window_seconds: 1800
+    design:
+      spacing:
+        padding: ["3rem", "0", "4rem", "0"]
+
   # Filterable Portfolio - Alpine.js powered project filtering
   - block: portfolio
     id: projects

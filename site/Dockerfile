@@ -4,7 +4,7 @@
 # renovate: datasource=github-releases depName=gohugoio/hugo
 ARG HUGO_VERSION=0.170.1
 
-FROM node:24-alpine AS build
+FROM node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bfd3d99a554bfd9adeea09ea8017f6e85f5 AS build
 ARG HUGO_VERSION
 
 # Ab Hugo 0.170.0 gibt es nur noch ein Binary ("extended" ist als Alias entfallen).
@@ -29,7 +29,7 @@ COPY . .
 RUN hugo --minify
 
 # Letzte Stage
-FROM nginx/nginx-unprivileged:1.30-alpine
+FROM nginx/nginx-unprivileged:1.30-alpine@sha256:0c53a1f2890c3526bfd201440f0fd3970e5b78f80630f58284aad0d34b5ec7bd
 # Base-Image-Tag ist floating — apk upgrade holt gefixte OS-Pakete (z.B. libxml2)
 # aus dem Alpine-Repo, auch wenn nginx das Base-Image nicht neu gebaut hat.
 # https://avd.aquasec.com/nvd/2026/cve-2026-86144/

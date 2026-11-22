@@ -1,0 +1,153 @@
+# Default values for metric.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Bewusst 1 und kein HPA: RAM-Ringbuffer + SSE-Subscriber sind prozesslokal
+# (realtime.py) — bei >1 Replica wuerden die Streams auseinanderlaufen.
+replicaCount: 1
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  # Wird von .github/workflows/metric.yml gebaut und via ghcr.io veröffentlicht.
+  # image.tag wird von der CI auf den jeweiligen Commit-SHA gebumpt (immutable tags).
+  repository: ghcr.io/miathedev/metzler.systems/metric
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # "latest" existiert ab dem ersten CI-Lauf auf main, danach bumped die CI
+  # auf sha-<commit> (immutable tags). appVersion als Fallback würde auf ein
+  # nie gepushtes Image zeigen.
+  tag: "latest"
+# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# Oeffentliches Präfix des Ingress. uvicorn --root-path wird darueber gesetzt
+# (nur Logging/URL-Generierung, strippt NICHT selbst), das eigentliche Stripping
+# macht die StripPrefix-Middleware aus templates/middleware.yaml.
+rootPath: /api/metrics
+
+# Realtime-Sampling: der Pod sampled metrics.k8s.io mit METRIC_SAMPLE_HZ (1-30/s,
+# "30fps"-Streaming per SSE /stream), haelt die Samples METRIC_RETENTION_MINUTES
+# lang in einem RAM-Ringbuffer (serviert per /history) und pusht sie live an
+# /stream-Clients. Env wird 1:1 als name/value-Liste ins Deployment gerendert.
+env:
+  METRIC_SAMPLE_HZ: "10"
+  METRIC_RETENTION_MINUTES: "30"
+
+#This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  # annotations:
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+# This is for setting Kubernetes Annotations to a Pod.
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+podLabels: {}
+podSecurityContext:
+  fsGroup: 101
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  #Droppe alle Capabilities, wir benötigen keine
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  allowPrivilegeEscalation: false
+  # Die App schreibt nichts auf die Platte (PYTHONDONTWRITEBYTECODE im Image)
+  readOnlyRootFilesystem: true
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# ClusterIP bewusst: der bestehende Traefik-LoadBalancer (Namespace traefik) wird
+# per Ingress wiederverwendet, ein eigener LoadBalancer würde extra kosten.
+service:
+  type: ClusterIP
+  port: 8080
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: metzler.systems
+      paths:
+        - path: /api/metrics
+          pathType: Prefix
+  # Pro Exact-Pfad zusaetzliche Ingresses mit StripPrefix + RateLimit
+  # (templates/ingress.yaml + middleware.yaml): /state fragt live die
+  # K8s-API ab (~30 ms pro Call), /history serviert den RAM-Dump, /stream
+  # haelt eine SSE-Verbindung. Ohne Limit waere das oeffentlich hammerbar.
+  # /health bleibt ueber den Prefix oben ungedrosselt (Probes, Smoke-Test).
+  # Frontend-Poll-Fallback auf /state: alle 3 s -> 30/60s reicht.
+  rateLimitPaths:
+    - path: /api/metrics/state
+      average: 30
+      burst: 30
+      period: 60s
+    - path: /api/metrics/history
+      average: 10
+      burst: 10
+      period: 60s
+    - path: /api/metrics/stream
+      average: 5
+      burst: 5
+      period: 60s
+  tls:
+    - secretName: metric-tls
+      hosts:
+        - metzler.systems
+resources:
+  # 10 Samples/s gegen die K8s-API plus SSE-Broadcast brauchen etwas mehr als
+  # 100m CPU; der RAM-Ringbuffer (10 Hz * 30 min = 18000 Samples a ~150 B) ist
+  # dagegen vernachlässigbar (~3 MB).
+  limits:
+    cpu: 250m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Probes zeigen auf /health (ohne K8s-API-Abhängigkeit), nicht auf
+# /state — sonst wird der Pod NotReady, sobald metrics.k8s.io hakt.
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+# Zusätzliche Volumes und Mounts
+volumes: []
+volumeMounts: []
+
+# NetworkPolicy (templates/networkpolicy.yaml): default-deny, Ingress nur von
+# Traefik, Egress nur DNS + K8s-API.
+networkPolicy:
+  enabled: true
+  # Egress zur K8s-API (siehe networkpolicy.yaml): default breit, in prod pinnt
+  # die HelmRelease per valuesFrom das Secret `k8s-api-endpoint` auf den
+  # API-Endpunkt des Clusters (siehe load-Chart Kommentar zu
+  # networkPolicy.k8sApiCIDRs/k8sApiPorts). Dev/kind behaelt 0.0.0.0/0.
+  k8sApiCIDRs:
+    - 0.0.0.0/0
+  # 443 = Service-Port; zusaetzlich targetPort fuer CNIs mit post-DNAT-Policy
+  # (Calico) — in prod setzt das Secret `k8s-api-endpoint` beides.
+  k8sApiPorts:
+    - 443
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

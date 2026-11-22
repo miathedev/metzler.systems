@@ -49,7 +49,8 @@ securityContext:
   capabilities:
     drop:
       - ALL
-  # readOnlyRootFilesystem: true
+  # readOnlyRootFilesystem bleibt aus: nginx-unprivileged schreibt tmp/cache-Pfade
+  # (sonst bricht der Pod beim Start) — die Apps load/metric setzen es dagegen.
 
   #rootless user und gid
   runAsNonRoot: true
@@ -101,9 +102,9 @@ readinessProbe:
 autoscaling:
   enabled: true
   minReplicas: 1
-  maxReplicas: 4
+  maxReplicas: 10 # Nach automatischem Last-Test angehoben, damit die Skalierung als Stufe im Live-Graphen sichtbar wird.
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 # Additional volumes on the output Deployment definition.
 volumes: []
 # - name: foo
@@ -116,6 +117,11 @@ volumeMounts: []
 # - name: foo
 #   mountPath: "/etc/foo"
 #   readOnly: true
+
+# NetworkPolicy (templates/networkpolicy.yaml): default-deny, Ingress nur von
+# Traefik, Egress nur DNS. Schuetzt den Namespace gegen laterale Bewegung.
+networkPolicy:
+  enabled: true
 
 nodeSelector: {}
 tolerations: []

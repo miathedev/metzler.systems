@@ -5,10 +5,12 @@ metadata:
   name: {{ include "website.fullname" . }}
   labels:
     {{- include "website.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+    # Security-Header (HSTS + nosniff) aus diesem Chart (templates/middleware.yaml)
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "website.fullname" . }}-headers@kubernetescrd
+    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
   {{- with .Values.ingress.className }}
   ingressClassName: {{ . }}

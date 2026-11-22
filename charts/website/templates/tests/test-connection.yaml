@@ -1,15 +1,22 @@
+# test-connection.yaml: Helm-Test-Hook (helm test website) — wget gegen den Service.
 apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "website.fullname" . }}-test-connection"
   labels:
-    {{- include "website.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    # Eigenes Label statt selectorLabels: sonst waere der Test-Pod selbst von der
+    # default-deny NetworkPolicy gewaehlt (Egress nur DNS) und kaeme unter einem
+    # durchsetzenden CNI nicht zum Service. Die NetPol erlaubt Ingress von genau
+    # diesem Label (siehe networkpolicy.yaml).
+    metzler.systems/helm-test: "true"
   annotations:
     "helm.sh/hook": test
 spec:
   containers:
     - name: wget
-      image: busybox
+      # renovate: datasource=docker depName=busybox (Digest-Pin via renovate.json)
+      image: busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec
       command: ['wget']
       args: ['{{ include "website.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

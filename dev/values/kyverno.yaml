@@ -1,0 +1,5 @@
+# Wie prod (flux/cluster/infomaniak/releases.yaml), aber 1 Replica lokal.
+# setup.sh wartet auf den Admission-Webhook, bevor weitere Releases
+# installiert werden (failurePolicy Fail blockiert sonst alles).
+admissionController:
+  replicas: 1

@@ -6,24 +6,49 @@
   ],
   "packageRules": [
     {
-      "matchDepNames": ["gohugoio/hugo"],
+      "matchManagers": [
+        "github-actions",
+        "docker"
+      ],
+      "pinDigests": true,
+      "commitMessageTopic": "digest-pin"
+    },
+    {
+      "matchDepNames": [
+        "gohugoio/hugo"
+      ],
       "commitMessageTopic": "hugo",
       "automerge": false
     },
     {
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["patch", "minor", "pin", "digest"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor",
+        "pin",
+        "digest"
+      ],
       "minimumReleaseAge": "14 days",
       "automerge": true
     },
     {
-      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
       "minimumReleaseAge": "14 days",
       "automerge": true
     },
     {
-      "matchDatasources": ["helm"],
-      "matchUpdateTypes": ["minor"],
+      "matchDatasources": [
+        "helm"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
       "minimumReleaseAge": "14 days",
       "automerge": true
     }

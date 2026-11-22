@@ -1,0 +1,53 @@
+# Traefik (Chart 42.4.0, wie prod) strippt bei pathType: Prefix den Pfad NICHT
+# automatisch — die App erwartet aber /health statt /api/metrics/health
+# (uvicorn --root-path ist nur fuer Logging/URL-Generierung). Deshalb eine
+# StripPrefix-Middleware direkt im Chart, referenziert ueber die Ingress-
+# Annotation in ingress.yaml. Gilt fuer prod UND dev gleichermaßen.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "metric.fullname" . }}-stripprefix
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - {{ .Values.rootPath | quote }}
+---
+# Security-Header fuer die API-Antworten (nosniff; HSTS greift host-weit,
+# sobald die website-Route sie setzt). CSP bewusst nicht gesetzt.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "metric.fullname" . }}-headers
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+spec:
+  headers:
+    customResponseHeaders:
+      Strict-Transport-Security: "max-age=31536000"
+      X-Content-Type-Options: "nosniff"
+{{- range $rl := required "ingress.rateLimitPaths fehlt in den values" .Values.ingress.rateLimitPaths }}
+{{- $slug := $rl.path | trimPrefix "/" | replace "/" "-" | replace "." "-" }}
+---
+# RateLimit pro Client-IP fuer den Exact-Pfad {{ .path }} (siehe values
+# ingress.rateLimitPaths). sourceCriterion ipStrategy.depth=1: die RICHTIGE
+# Client-IP ist der rechte XFF-Eintrag (von Traefik angehaengt) — depth 0
+# (RemoteAddr) waere die Traefik-Pod-IP, alle Requests zaehlten in einen Topf.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "metric.fullname" $ }}-ratelimit-{{ $slug }}
+  labels:
+    {{- include "metric.labels" $ | nindent 4 }}
+spec:
+  rateLimit:
+    # required pro Feld: kaputte rateLimitPaths-Eintraege sollen mit klarer
+    # Fehlermeldung fehlschlagen statt nil zu rendern
+    average: {{ required "ingress.rateLimitPaths[].average fehlt" $rl.average }}
+    burst: {{ required "ingress.rateLimitPaths[].burst fehlt" $rl.burst }}
+    period: {{ (required "ingress.rateLimitPaths[].period fehlt" $rl.period) | quote }}
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+{{- end }}

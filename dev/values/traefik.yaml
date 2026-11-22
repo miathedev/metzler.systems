@@ -1,0 +1,23 @@
+# Lokale Overrides fuer das Traefik-Chart (gleiche Version wie prod, siehe
+# flux/cluster/infomaniak/releases.yaml). Im kind gibt es keinen LoadBalancer:
+# NodePort 30080/30443, die kind auf Host-Port 80/443 mappt (kind-config.yaml,
+# Fallback 8080/8443). TLS terminiert Traefik mit den Ingress-Secret-Certs
+# (website-tls, metric-tls), die setup.sh aus dem mkcert-Cert erzeugt.
+deployment:
+  replicas: 1
+service:
+  spec:
+    type: NodePort
+ports:
+  web:
+    port: 80
+    nodePort: 30080
+  websecure:
+    port: 443
+    nodePort: 30443
+ingressClass:
+  enabled: true
+  name: traefik
+providers:
+  kubernetesIngress:
+    enabled: true

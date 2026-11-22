@@ -1,0 +1,14 @@
+# middleware.yaml: Security-Header fuer die statische Site — HSTS (TLS ist
+# per cert-manager immer an) und nosniff. CSP bewusst NICHT gesetzt: HugoBlox
+# arbeitet mit Inline-Styles/-Scripts, eine strikte CSP wuerde die Site brechen.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "website.fullname" . }}-headers
+  labels:
+    {{- include "website.labels" . | nindent 4 }}
+spec:
+  headers:
+    customResponseHeaders:
+      Strict-Transport-Security: "max-age=31536000"
+      X-Content-Type-Options: "nosniff"

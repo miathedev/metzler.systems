@@ -1,0 +1,57 @@
+# networkpolicy.yaml: default-deny fuer die metric-App — Ingress nur von
+# Traefik, Egress nur DNS + K8s-API (Port 443). Die API-Endpunkte des
+# `kubernetes`-Service (default-Namespace) sind keine Pods und lassen sich
+# nicht per namespaceSelector fassen, deshalb ipBlock auf 443 (bewusst
+# breiter, aber ohne API-Zugriff kann die App nicht samplen).
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "metric.fullname" . }}-default-deny
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "metric.selectorLabels" . | nindent 6 }}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+    # helm-test-Pods (tests/test-connection.yaml) duerfen den Service wgetten.
+    - from:
+        - podSelector:
+            matchLabels:
+              metzler.systems/helm-test: "true"
+      ports:
+        - port: {{ .Values.service.port }}
+          protocol: TCP
+  egress:
+    # DNS-Aufloesung (kube-dns/coredns in kube-system)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    # K8s-API (pods/deployments/metrics.k8s.io) ueber den `kubernetes`-Service
+    # (default-Namespace, keine Pod-IPs — deshalb ipBlock statt namespaceSelector).
+    # CIDRs/Ports aus values (networkPolicy.k8sApiCIDRs/k8sApiPorts): in prod auf
+    # die API-Endpunkt-IP des Clusters einschraenken (siehe
+    # flux/cluster/infomaniak/releases.yaml), dev/kind behaelt 0.0.0.0/0.
+    - to:
+        {{- range .Values.networkPolicy.k8sApiCIDRs }}
+        - ipBlock:
+            cidr: {{ . | quote }}
+        {{- end }}
+      ports:
+        {{- range .Values.networkPolicy.k8sApiPorts }}
+        - port: {{ . }}
+          protocol: TCP
+        {{- end }}
+{{- end }}

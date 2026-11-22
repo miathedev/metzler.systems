@@ -1,0 +1,60 @@
+// settings.json — gemeinsame Workspace-Einstellungen fuer dieses Repo.
+// Alles andere unter .vscode/ bleibt lokal (gitignored, siehe .gitignore).
+{
+  "files.exclude": {
+    "**/site/public": true,
+    "**/site/resources": true,
+    "**/site/node_modules": true,
+    "**/.bin": true,
+    "**/__pycache__": true,
+    "**/.ruff_cache": true,
+    "**/dev/certs": true
+  },
+  "search.exclude": {
+    "**/site/public": true,
+    "**/site/node_modules": true,
+    "**/site/pnpm-lock.yaml": true,
+    "**/.bin": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/dev/certs": true
+  },
+  "files.watcherExclude": {
+    "**/site/node_modules/**": true,
+    "**/site/public/**": true,
+    "**/.bin/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/dev/certs/**": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  // Die CLI-Extension setzt LD_LIBRARY_PATH auf eigene Libs — damit crasht
+  // hugo im integrierten Terminal sofort. null entfernt die Variable dort
+  // (dev/run-tests.sh umgeht das zusaetzlich mit env -u).
+  "terminal.integrated.env.linux": {
+    "LD_LIBRARY_PATH": null
+  },
+  // Beide Apps nutzen flache Importe (from config import ...) direkt aus
+  // ihrem app/-Verzeichnis, deshalb beide app/-Ordner auf die Analyse-Pfade.
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/apps/load/app",
+    "${workspaceFolder}/apps/metric/app"
+  ],
+  // pytest laeuft pro App ueber die Tasks (tasks.json): beide Apps haben
+  // gleich benannte Module (config, k8s, main) — ein gemeinsamer Lauf von
+  // der Repo-Root wuerde mit import-mismatch abbrechen.
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  // Editor-Lint fuer die Apps; massgeblich bleibt "ruff check" aus
+  // dev/run-tests.sh bzw. dem CI-lint-Job.
+  "ruff.enable": true,
+  "yaml.schemas": {
+    "kubernetes": ["charts/**/*.yaml", "flux/**/*.yaml"],
+    "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json": ".github/workflows/*.yml",
+    "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/renovate.json": "renovate.json"
+  }
+}

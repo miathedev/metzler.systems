@@ -37,7 +37,7 @@ if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
   echo "pre-commit.sh: laeuft nur innerhalb eines Git-Repos" >&2
   exit 1
 fi
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || exit 1
 
 # Gepinnte Version fuer den Auto-Install von gitleaks (siehe install_gitleaks).
 GITLEAKS_VERSION="8.30.1"
@@ -201,12 +201,75 @@ check_typography() {
 }
 
 # ---------------------------------------------------------------------------
+# helm — lint + template aller lokalen Charts (prod-Defaults UND dev-values,
+# falls vorhanden). Faengt Template-Fehler ab, ohne einen Cluster zu brauchen.
+# Ohne installiertes helm wird der Check uebersprungen.
+# ---------------------------------------------------------------------------
+
+check_helm() {
+  if ! command -v helm >/dev/null 2>&1; then
+    echo "  helm nicht installiert, Check uebersprungen"
+    return 0
+  fi
+  local c failed=0
+  for c in "$REPO_ROOT"/charts/*/; do
+    c="$(basename "$c")"
+    [[ -f "$REPO_ROOT/charts/$c/Chart.yaml" ]] || continue
+    if ! helm lint "$REPO_ROOT/charts/$c" >/dev/null 2>&1; then
+      echo "  helm lint charts/$c fehlgeschlagen"
+      failed=1
+    fi
+    if ! helm template "$c" "$REPO_ROOT/charts/$c" -n website >/dev/null 2>&1; then
+      echo "  helm template charts/$c (prod-Defaults) fehlgeschlagen"
+      failed=1
+    fi
+    if [[ -f "$REPO_ROOT/dev/values/$c.yaml" ]]; then
+      if ! helm template "$c" "$REPO_ROOT/charts/$c" -n website \
+           -f "$REPO_ROOT/dev/values/$c.yaml" >/dev/null 2>&1; then
+        echo "  helm template charts/$c (dev-values) fehlgeschlagen"
+        failed=1
+      fi
+    fi
+  done
+  return "$failed"
+}
+
+# ---------------------------------------------------------------------------
+# local-only — Pfade, die ausschliesslich lokal bleiben und nie im Repo
+# landen duerfen. Die Pattern stehen in .gitignore bzw. .git/info/exclude und
+# werden hier nicht namentlich wiederholt (die Datei selbst ist oeffentlich).
+# Ein versehentliches `git add -f` wird hier abgefangen: check-ignore matcht
+# die Patterns rein, nur NEUE Dateien (diff-filter=A) werden geprueft, damit
+# bereits getrackte Dateien von Ignore-Regeln nicht faelschlich blockiert
+# werden.
+# ---------------------------------------------------------------------------
+
+check_local_only() {
+  local f leaked=0
+  if git diff --cached --quiet; then
+    echo "  keine gestageten Aenderungen, Check uebersprungen"
+    return 0
+  fi
+  # --no-index: sonst ignoriert check-ignore frisch gestagete (add -f) Dateien,
+  # weil sie im Index stehen und Ignore-Regeln fuer getrackte Pfade nicht greifen.
+  # NUL-getrennt lesen, weil Kommandoersetzung $(...) NUL-Bytes verwirft.
+  while IFS= read -r -d '' f; do
+    echo "  ignorierter Pfad (local-only/Secret/Artefakt), darf nicht committet werden: $f" >&2
+    leaked=1
+  done < <(git diff --cached --name-only --diff-filter=A -z \
+             | git check-ignore -z --no-index --stdin || true)
+  return "$leaked"
+}
+
+# ---------------------------------------------------------------------------
 # Check-Registry — hier landen kuenftig weitere Checks
 # ---------------------------------------------------------------------------
 
 CHECKS=(
   check_gitleaks
+  check_local_only
   check_typography
+  check_helm
 )
 
 # Der pre-commit-Hook sieht die Commit-Message nicht — die prueft der

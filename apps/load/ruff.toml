@@ -1,0 +1,5 @@
+# ruff.toml: Lint-Konfiguration fuer apps/load (per-file-ignores siehe unten).
+# whitelist_vulture.py enthaelt absichtlich "useless expressions" (Attribut-
+# Zugriffe als Vulture-Whitelist) und ein F401-noqa — hier hinnehmen.
+[lint.per-file-ignores]
+"whitelist_vulture.py" = ["B018", "RUF100"]

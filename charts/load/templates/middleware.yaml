@@ -1,0 +1,51 @@
+# Traefik (Chart 42.4.0, wie prod) strippt bei pathType: Prefix den Pfad NICHT
+# automatisch — die App erwartet aber /status statt /api/load/status
+# (uvicorn --root-path ist nur fuer Logging/URL-Generierung). Deshalb eine
+# StripPrefix-Middleware direkt im Chart, referenziert ueber die Ingress-
+# Annotation in ingress.yaml. Gilt fuer prod UND dev gleichermaßen.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "load.fullname" . }}-stripprefix
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - {{ .Values.rootPath | quote }}
+---
+# RateLimit auf dem oeffentlichen, auth-losen POST /api/load/ (Self-DoS-Schutz
+# gegen die eigene Site, siehe apps/load/app/main.py). sourceCriterion mit
+# ipStrategy.depth=1: die RICHTIGE Client-IP ist der rechte XFF-Eintrag (von
+# Traefik angehaengt) — depth 0 (RemoteAddr) waere die Traefik-Pod-IP, alle
+# Requests wuerden in einen Topf zaehlen.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "load.fullname" . }}-ratelimit
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  rateLimit:
+    # required: ein values-Override ohne ingress.rateLimit.* soll mit klarer
+    # Fehlermeldung fehlschlagen statt nil zu rendern
+    average: {{ required "ingress.rateLimit.average fehlt in den values" .Values.ingress.rateLimit.average }}
+    burst: {{ required "ingress.rateLimit.burst fehlt in den values" .Values.ingress.rateLimit.burst }}
+    period: {{ (required "ingress.rateLimit.period fehlt in den values" .Values.ingress.rateLimit.period) | quote }}
+    sourceCriterion:
+      ipStrategy:
+        depth: 1
+---
+# Security-Header fuer die API-Antworten (nosniff; HSTS greift host-weit,
+# sobald die website-Route sie setzt). CSP bewusst nicht gesetzt.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "load.fullname" . }}-headers
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  headers:
+    customResponseHeaders:
+      Strict-Transport-Security: "max-age=31536000"
+      X-Content-Type-Options: "nosniff"

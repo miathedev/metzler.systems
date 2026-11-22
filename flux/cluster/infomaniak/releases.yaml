@@ -148,6 +148,82 @@ spec:
     remediation:
       retries: 3
 ---
+# metrics-server (metrics.k8s.io API für kubectl top und die metric-App)
+# Infomaniak-KaaS-Sonderlocken (Details inline, damit keine lokalen Doku-Namen ins Repo wandern):
+# Kubelet-Serving-Certs haben keine IP-SANs und Node-Hostnames sind aus dem
+# Pod-Netz nicht auflösbar, deshalb --kubelet-insecure-tls und InternalIP.
+# Das Chart hängt `args` an die defaultArgs an, spätere Flags gewinnen.
+# Risiko: --kubelet-insecure-tls schaltet die TLS-Verifikation der
+# Kubelet-Verbindung aus (MITM im Clusternetz wäre möglich). Mangels IP-SANs
+# vorerst nötig; langfristig Kubelet-Certs mit IP-SANs oder TLS-Proxy, dann Flag entfernen.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metrics-server
+  namespace: kube-system
+spec:
+  interval: 30m0s
+  chart:
+    spec:
+      chart: metrics-server
+      version: "3.14.0"
+      sourceRef:
+        kind: HelmRepository
+        name: metrics-server
+        namespace: flux-system
+      interval: 1m0s
+  values:
+    args:
+      - --kubelet-insecure-tls
+      - --kubelet-preferred-address-types=InternalIP
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# Metrics-API (Namespace website, metzler.systems/api/metrics hängt am
+# bestehenden Traefik-LoadBalancer, kein eigener LoadBalancer)
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: metric
+  namespace: website
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: traefik
+      namespace: traefik
+    - name: cluster-issuers
+      namespace: cert-manager
+    - name: metrics-server
+      namespace: kube-system
+  chart:
+    spec:
+      chart: charts/metric
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 1m0s
+  # Anti-Exfiltration: Egress zur K8s-API auf den API-Endpunkt des Clusters
+  # pinnen. CIDRs + Ports kommen nicht aus dem Repo, sondern per valuesFrom
+  # aus dem Secret `k8s-api-endpoint` im selben Namespace wie die HelmRelease
+  # (wird einmalig out-of-band angelegt). Calico wertet Egress nach DNAT aus,
+  # deshalb muss der targetPort des `kubernetes`-Service mit hinein.
+  valuesFrom:
+    - kind: Secret
+      name: k8s-api-endpoint
+      valuesKey: netpol.yaml
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
 # Webseite
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -169,6 +245,50 @@ spec:
         name: flux-system
         namespace: flux-system
       interval: 1m0s
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+---
+# Load-Service (Namespace website, metzler.systems/api/load hängt am
+# bestehenden Traefik-LoadBalancer): kuenstlicher Last-Trigger fuer die
+# website (POST /api/load/ = 5-min-Run, 409 solange aktiv). RBAC nur
+# batch/jobs + pods/log im eigenen Namespace (charts/load/templates/rbac.yaml),
+# skaliert wird ueber den HPA der website.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: load
+  namespace: website
+spec:
+  interval: 30m0s
+  dependsOn:
+    - name: traefik
+      namespace: traefik
+    - name: cluster-issuers
+      namespace: cert-manager
+    - name: website
+      namespace: website
+  chart:
+    spec:
+      chart: charts/load
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 1m0s
+  # Anti-Exfiltration: Egress zur K8s-API auf den API-Endpunkt des Clusters
+  # pinnen. CIDRs + Ports kommen nicht aus dem Repo, sondern per valuesFrom
+  # aus dem Secret `k8s-api-endpoint` im selben Namespace wie die HelmRelease
+  # (wird einmalig out-of-band angelegt). Calico wertet Egress nach DNAT aus,
+  # deshalb muss der targetPort des `kubernetes`-Service mit hinein.
+  valuesFrom:
+    - kind: Secret
+      name: k8s-api-endpoint
+      valuesKey: netpol.yaml
   install:
     createNamespace: true
     remediation:

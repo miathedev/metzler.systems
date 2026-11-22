@@ -1,0 +1,100 @@
+# ingress.yaml: Prefix-Ingress /api/metrics (StripPrefix+Headers, kein RateLimit)
+# plus pro ingress.rateLimitPaths-Eintrag ein Exact-Ingress mit zusaetzlichem
+# RateLimit. Kein eigener LoadBalancer: beide hängen am bestehenden
+# Traefik-LoadBalancer (Service traefik im Namespace traefik).
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "metric.fullname" . }}
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+  annotations:
+    # StripPrefix-Middleware aus diesem Chart (templates/middleware.yaml) —
+    # ohne strippt Traefik bei pathType: Prefix nicht und die App antwortet 404.
+    # Kein RateLimit auf dem Prefix: /health (Probes) und ggf. kuenftige
+    # leichte GETs sollen nicht gedrosselt werden.
+    traefik.ingress.kubernetes.io/router.middlewares: {{ .Release.Namespace }}-{{ include "metric.fullname" . }}-stripprefix@kubernetescrd,{{ .Release.Namespace }}-{{ include "metric.fullname" . }}-headers@kubernetescrd
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- with .pathType }}
+            pathType: {{ . }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ include "metric.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+{{- if .Values.ingress.enabled }}
+{{- range required "ingress.rateLimitPaths fehlt in den values" .Values.ingress.rateLimitPaths }}
+{{- $slug := .path | trimPrefix "/" | replace "/" "-" | replace "." "-" }}
+---
+# Pro geschuetztem Pfad ein eigener Exact-Ingress mit StripPrefix + RateLimit
+# (Werte siehe ingress.rateLimitPaths in values.yaml). Exact gewinnt gegen den
+# Prefix oben — /state, /history und /stream sind so pro Client-IP gedrosselt,
+# /health bleibt frei.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "metric.fullname" $ }}-rl-{{ $slug }}
+  labels:
+    {{- include "metric.labels" $ | nindent 4 }}
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: {{ $.Release.Namespace }}-{{ include "metric.fullname" $ }}-stripprefix@kubernetescrd,{{ $.Release.Namespace }}-{{ include "metric.fullname" $ }}-ratelimit-{{ $slug }}@kubernetescrd,{{ $.Release.Namespace }}-{{ include "metric.fullname" $ }}-headers@kubernetescrd
+    {{- with $.Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with $.Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if $.Values.ingress.tls }}
+  tls:
+    {{- range $.Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range $.Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: {{ .path }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metric.fullname" $ }}
+                port:
+                  number: {{ $.Values.service.port }}
+    {{- end }}
+{{- end }}
+{{- end }}

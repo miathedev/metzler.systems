@@ -1,0 +1,94 @@
+# deployment.yaml: Deployment der load-App (securityContext aus values, readOnlyRootFilesystem).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "load.fullname" . }}
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "load.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "load.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "load.serviceAccountName" . }}
+      # Token wird gebraucht: die App erstellt/liest batch/jobs und pods/log
+      # im eigenen Namespace (siehe templates/rbac.yaml).
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.rootPath }}
+          args: ["--root-path", {{ . | quote }}]
+          {{- end }}
+          env:
+            {{- with .Values.env }}
+            {{- range $name, $value := . }}
+            - name: {{ $name }}
+              value: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+            # Eigener Namespace per Downward-API statt hartkodiertem Wert
+            # (config.py liest POD_NAMESPACE).
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            # k6-Run-Job: Image/ConfigMap/Ressourcen aus values.k6 (an die App
+            # durchgereicht, die daraus den batch/v1-Job baut)
+            - name: LOAD_K6_IMAGE
+              value: {{ .Values.k6.image | quote }}
+            - name: LOAD_K6_CONFIGMAP
+              value: {{ default (printf "%s-k6" (include "load.fullname" .)) .Values.k6.scriptConfigMap | quote }}
+            - name: LOAD_K6_RESOURCES
+              value: {{ .Values.k6.resources | toJson | quote }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

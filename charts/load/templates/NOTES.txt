@@ -1,0 +1,15 @@
+{{/* NOTES.txt: Ausgabe nach helm install/upgrade von charts/load — als
+Template-Kommentar, damit die Kopfzeile nicht 1:1 in der helm-Ausgabe landet. */}}
+1. Die Load-API ist erreichbar unter:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+{{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}/status
+  POST http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}/  (k6-Run-Job starten, 409 wenn bereits aktiv)
+{{- end }}
+{{- end }}
+{{- else }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "load.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.service.port }}
+  http://127.0.0.1:8080/status
+{{- end }}

@@ -1,0 +1,72 @@
+// tasks.json — gemeinsame Tasks, laufen im integrierten Terminal mit cwd = Repo-Root.
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "app",
+      "type": "pickString",
+      "description": "Welche App soll neu gebaut und deployt werden?",
+      "options": ["website", "metric", "load", "all"]
+    }
+  ],
+  "tasks": [
+    {
+      "label": "tests: alle",
+      "type": "shell",
+      "command": "dev/run-tests.sh",
+      "group": { "kind": "test", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+    },
+    {
+      "label": "tests: load",
+      "type": "shell",
+      "command": "dev/run-tests.sh load",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "tests: metric",
+      "type": "shell",
+      "command": "dev/run-tests.sh metric",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "tests: helm + hugo",
+      "type": "shell",
+      "command": "dev/run-tests.sh helm hugo",
+      "group": "test",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    },
+    {
+      "label": "dev: kind-Stack starten",
+      "type": "shell",
+      "command": "dev/setup.sh",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "dev: App-Image bauen + deployen",
+      "type": "shell",
+      "command": "dev/dev-image.sh ${input:app}",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "dev: kind-Stack stoppen",
+      "type": "shell",
+      "command": "dev/teardown.sh",
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      // Hook-Checks nie gegen den echten Git-Index laufen lassen, sondern
+      // gegen einen temporaeren — sonst landet unbeabsichtigt etwas im Stage.
+      // rm -f zuerst: ein Durchlauf ohne Aufraeumen wuerde sonst einen stale
+      // Index mit alten Stage-Inhalten pruefen.
+      "label": "hooks: pre-commit-Checks (temp Index)",
+      "type": "shell",
+      "command": "rm -f /tmp/idx-vscode && GIT_INDEX_FILE=/tmp/idx-vscode git add -A && GIT_INDEX_FILE=/tmp/idx-vscode bash pre-commit.sh",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "shared" }
+    }
+  ]
+}

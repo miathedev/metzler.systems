@@ -48,8 +48,26 @@ spec:
       name: kyverno-policies
       namespace: kyverno
 
+    # metrics-server (metrics.k8s.io API), wird nicht von infomaniak by default mitgeliefert
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: metrics-server
+      namespace: kube-system
+
+    # Metrics-API, um auf der webseite live den state darzustellen
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: metric
+      namespace: website
+
     # Webseite
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
       name: website
+      namespace: website
+
+    # Load-Service (k6-Run-Jobs als Last-Trigger fuer die website)
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: load
       namespace: website

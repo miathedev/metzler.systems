@@ -1,0 +1,13 @@
+# k6-Script fuer die Run-Jobs: die load-App mountet diese ConfigMap in jeden
+# k6-Job (files/loadtest.js, Env K6_* konfiguriert Rate/Dauer/Ziel).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "load.fullname" . }}-k6
+  labels:
+    {{- include "load.labels" . | nindent 4 }}
+# Kyverno-Policy (charts/kyverno-policies): ConfigMaps muessen immutable sein
+immutable: true
+data:
+  loadtest.js: |
+{{ .Files.Get "files/loadtest.js" | nindent 4 }}

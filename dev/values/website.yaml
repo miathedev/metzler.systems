@@ -1,0 +1,14 @@
+# Lokale Overrides fuer charts/website (genutzt von dev/setup.sh und
+# dev/dev-image.sh).
+image:
+  # Wird lokal gebaut (docker build site/) und per `kind load docker-image`
+  # in den kind-Cluster geladen — nie von ghcr gepullt, damit lokale
+  # Aenderungen getestet werden (pullPolicy: Never).
+  tag: "dev"
+  pullPolicy: Never
+ingress:
+  # Kein cert-manager im kind: das TLS-Secret website-tls wird von setup.sh
+  # aus dem mkcert-Cert erzeugt. Helm merged -f-Maps, deshalb die Annotation
+  # explizit auf null setzen (sonst bleibt letsencrypt-prod aus values.yaml stehen).
+  annotations:
+    cert-manager.io/cluster-issuer: null

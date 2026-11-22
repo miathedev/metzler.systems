@@ -3,6 +3,16 @@
 
 # Lokale Tools (z.B. Auto-Install von gitleaks durch pre-commit.sh)
 /.bin/
+
+# Lokale dev-Zertifikate (mkcert-CA und Certs aus dev/setup.sh) — nie committen
+dev/certs/
+# Vorheriger kubectl-Kontext, den dev/teardown.sh wiederherstellt
+dev/.prev-context
+# Marker: /etc/hosts-Eintrag wurde von dev/setup.sh gesetzt und darf von
+# dev/teardown.sh wieder entfernt werden
+dev/.hosts-added
+# Von dev/setup.sh geschriebener HTTPS-Port (dev-image.sh meldet URLs damit)
+dev/.https-port
 # Keine Binaerartefakte im Repo: vendored chart deps werden ignoriert.
 # Flux nutzt fuer Upstream-Charts direkt HelmRepositories (siehe flux/cluster/infomaniak/),
 # lokale Charts ohne Deps kommen als Git-Source.
@@ -16,12 +26,22 @@ charts/*/charts/
 *.orig
 *~
 .idea/
-# VSCode: alles lokal ignorieren, außer den geteilten Extension-Empfehlungen
+# VSCode: alles lokal ignorieren, außer den geteilten Workspace-Dateien
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 
 # Logs
 *.log
+
+# Python
+__pycache__/
+*.pyc
+.ruff_cache/
+# Coverage-Artefakte der pytest-Läufe (dev/run-tests.sh mit --cov)
+.coverage
 
 # Hugo (site/)
 site/public/

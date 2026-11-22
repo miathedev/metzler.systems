@@ -1,0 +1,34 @@
+# Strikt namespaced: die App liest nur im eigenen Namespace (website)
+# Pods, Deployments und metrics.k8s.io-Podmetriken. Bewusst keine
+# ClusterRole — Node-Metriken (cluster-scoped) werden nicht veröffentlicht.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "metric.fullname" . }}
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "metric.fullname" . }}
+  labels:
+    {{- include "metric.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "metric.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "metric.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}

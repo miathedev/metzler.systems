@@ -1,0 +1,8 @@
+# Runtime-Deps kommen gepinnt aus requirements.txt mit (CI-Lint installiert
+# nur diese eine Datei und braucht fastapi/kubernetes fuer pytest).
+-r requirements.txt
+ruff
+vulture
+pytest
+pytest-cov
+httpx

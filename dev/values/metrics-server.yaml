@@ -1,0 +1,5 @@
+# Wie prod (flux/cluster/infomaniak/releases.yaml): --kubelet-insecure-tls und
+# InternalIP sind wegen der Kubelet-Certs ohne IP-SANs noetig, im kind ebenso.
+args:
+  - --kubelet-insecure-tls
+  - --kubelet-preferred-address-types=InternalIP

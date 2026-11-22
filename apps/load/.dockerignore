@@ -1,0 +1,12 @@
+# Build-Context apps/<app>: nur app/ + requirements.txt landen im Image.
+__pycache__/
+**/__pycache__/
+.ruff_cache/
+scripts/
+tests/
+whitelist_vulture.py
+ruff.toml
+requirements.in
+requirements-dev.in
+requirements-dev.txt
+README.md

@@ -1,0 +1,44 @@
+# Lokale Overrides fuer charts/metric (genutzt von dev/setup.sh und
+# dev/dev-image.sh).
+image:
+  # Wird lokal gebaut (docker build apps/metric/) und per `kind load
+  # docker-image` in den kind-Cluster geladen — nie von ghcr gepullt, damit
+  # lokale Aenderungen getestet werden (pullPolicy: Never).
+  tag: "dev"
+  pullPolicy: Never
+ingress:
+  # Kein cert-manager im kind: das TLS-Secret metric-tls wird von setup.sh
+  # aus dem mkcert-Cert erzeugt, die cert-manager-Annotation muss weg.
+  # cert-manager.io/cluster-issuer auf null, weil Helm -f-Maps merged (sonst
+  # bleibt letsencrypt-prod stehen). Die StripPrefix-Middleware kommt aus dem
+  # Chart selbst (templates/middleware.yaml + Ingress-Default-Annotation).
+  annotations:
+    cert-manager.io/cluster-issuer: null
+  # Lokal grosszuegiger als prod, damit man beim Testen nicht ausgesperrt wird
+  rateLimitPaths:
+    - path: /api/metrics/state
+      average: 100
+      burst: 100
+      period: 60s
+    - path: /api/metrics/history
+      average: 100
+      burst: 100
+      period: 60s
+    - path: /api/metrics/stream
+      average: 20
+      burst: 20
+      period: 60s
+# Realtime-Demo lokal: volle 30 Hz ("30fps") statt prod-Default 10 Hz.
+env:
+  METRIC_SAMPLE_HZ: "30"
+  METRIC_RETENTION_MINUTES: "30"
+resources:
+  # Lokal hoeher als prod (128Mi): python+uvicorn kommt in kind sonst an das
+  # Limit und wird OOM-killed (exit 137). 30 Hz Sampling + RAM-Ringbuffer
+  # (30 min * 30 Hz = 54000 Samples) brauchen etwas CPU und RAM.
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi

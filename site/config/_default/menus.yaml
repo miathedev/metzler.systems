@@ -6,6 +6,9 @@ main:
   - name: About
     url: /about/
     weight: 5
+  - name: Live
+    url: /#live
+    weight: 8
   - name: Projects
     url: /#projects
     weight: 10
