@@ -12,7 +12,7 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "sha-3f46c3d"
+  tag: "sha-a05cf1b"
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
 # This is to override the chart name.
@@ -122,7 +122,6 @@ volumeMounts: []
 # Traefik, Egress nur DNS. Schuetzt den Namespace gegen laterale Bewegung.
 networkPolicy:
   enabled: true
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
