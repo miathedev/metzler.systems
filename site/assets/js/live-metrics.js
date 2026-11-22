@@ -359,6 +359,11 @@ echarts.use([LineChart, GridComponent, DataZoomComponent, CanvasRenderer]);
   function feedSample(sample) {
     if (!sample || !sample.s) return;
     var t = sample.t;
+    // Monotonie-Guard: ECharts zeichnet in Datenreihenfolge, ein Sample mit
+    // t <= lastT wuerde die Linie rueckwaerts malen (Zickzack). Tritt auf bei
+    // SSE-Reconnect (history wird komplett neu gefuettert) und im Poll-Mix
+    // (gecachter /state-Zeitstempel kann hinter dem letzten Stream-Sample liegen).
+    if (t <= lastT) return;
     lastT = t;
     if (clockEl) clockEl.textContent = fmtTime(t);
     if (emptyEl) emptyEl.style.display = "none";
