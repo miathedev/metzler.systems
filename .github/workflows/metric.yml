@@ -155,14 +155,26 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # Sequentiell statt parallel: alle bump-tag-Jobs (website/load/metric)
+    # teilen sich eine Queue und pushen nie gleichzeitig nach main.
+    concurrency:
+      group: bump-tag-main
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          fetch-depth: 0
 
       - name: image.tag im Chart automatisiert auf Commit-SHA aktualisieren
         run: |
           # metadata-action pusht type=sha,format=short -> Tag "sha-<7 Zeichen>".
           # Der Chart-Tag muss exakt dazu passen, sonst schlaegt der Image-Pull fehl.
+          # Checkout pinnt auf den Run-SHA; inzwischen kann ein anderer
+          # bump-tag-Job gepusht haben -> immer auf den aktuellen main-Tip
+          # legen, sonst schlaegt der Push mit "fetch first" fehl.
+          git fetch origin main
+          git reset --hard origin/main
           SHORT_SHA=$(echo '${{ github.sha }}' | cut -c1-7)
           yq -i ".image.repository = \"ghcr.io/${{ github.repository }}/metric\" | .image.tag = \"sha-${SHORT_SHA}\"" charts/metric/values.yaml
           # Chart-Version mitbumpen: helm-controller cacht Charts am Version-String
