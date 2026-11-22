@@ -53,6 +53,12 @@ COMMIT_MSG_PATTERN='^[A-Za-z][A-Za-z0-9_-]*(\([A-Za-z0-9_./-]+\))?: .+'
 TYPO_PATTERN='(?<!&[A-Za-z0-9#]{1,10});|[^\x00-\x7F\x{00A7}\x{00C0}-\x{00D6}\x{00D8}-\x{00F6}\x{00F8}-\x{00FF}]|&(?i:mdash|ndash|rarr|hellip|lsquo|rsquo|ldquo|rdquo|nbsp);'
 # Repo-lokales Verzeichnis fuer auto-installierte Tools (gitignored via .bin/).
 LOCAL_BIN="$REPO_ROOT/.bin"
+# IP-/Digest-Muster fuer check_no_remote_ips und check_docker_digests.
+# IPv6 nur komprimiert (mit ::), MAC-Adressen enthalten kein :: und matchen
+# daher nicht. IPv4-Kandidaten werden samt Oktetts in awk validiert.
+IPV4_RE='([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?'
+IPV6_RE='[0-9A-Fa-f:]*::[0-9A-Fa-f:]*'
+DIGEST_RE='sha256:[0-9A-Fa-f]+'
 
 FAILED_CHECKS=()
 
@@ -262,12 +268,112 @@ check_local_only() {
 }
 
 # ---------------------------------------------------------------------------
+# no_remote_ips — IP-Adressen in gestageten Dateien duerfen nicht auf einen
+# fremden Host zeigen. Erlaubt sind nur effektiv lokale bzw. wilde Werte:
+# 127.0.0.0/8 und ::1 (Loopback) sowie 0.0.0.0/0, 0.0.0.0 und :: (Bind-all /
+# Wildcard, kein Remote-Endpunkt). Alles andere wird geblockt, damit keine
+# Cluster- oder Infrastruktur-IP ins oeffentliche Repo geraet.
+# ---------------------------------------------------------------------------
+
+check_no_remote_ips() {
+  local files f out bad=0
+  if git diff --cached --quiet; then
+    echo "  keine gestageten Aenderungen, Scan uebersprungen"
+    return 0
+  fi
+  files="$(git diff --cached --name-only --diff-filter=ACM || true)"
+  if [[ -z "$files" ]]; then
+    echo "  keine gestageten Dateien"
+    return 0
+  fi
+  while IFS= read -r f; do
+    # -I ueberspringt Binaerdateien; git show :$f liest die gestagete Version
+    out="$(git show ":$f" 2>/dev/null | grep -InEo -e "$IPV4_RE" -e "$IPV6_RE" | LC_ALL=C awk -v f="$f" '
+      {
+      if (!match($0, /^[0-9]+:/)) next
+      line = substr($0, 1, RLENGTH - 1)
+      tok = substr($0, RLENGTH + 1)
+      ip = tok
+      sub(/\/.*$/, "", ip)
+      ok = 0
+      if (index(tok, "::") > 0) {
+        if (ip == "::1" || ip == "::") ok = 1
+      } else {
+        n = split(ip, o, ".")
+        valid = (n == 4)
+        for (i = 1; i <= 4; i++) if (o[i] !~ /^[0-9]+$/ || o[i] + 0 > 255) valid = 0
+        if (valid && (o[1] == 127 || ip == "0.0.0.0")) ok = 1
+      }
+      if (!ok) { printf "%s:%s: %s\n", f, line, tok; bad = 1 }
+      }
+      END { exit bad }
+    ')"
+    if [[ -n "$out" ]]; then
+      echo "$out"
+      bad=1
+    fi
+  done <<< "$files"
+  if ((bad)); then
+    {
+      echo "  verboten: IP-Adressen ausser Loopback (127.0.0.0/8, ::1) und Wildcard (0.0.0.0/0, ::)"
+      echo "  Grund: keine Cluster- oder Infrastruktur-IP darf ins oeffentliche Repo"
+    } >&2
+    return 1
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------------
+# docker_digests — gepinnte Image-Digests (@sha256:...) muessen exakt 64
+# Hex-Zeichen haben, sonst schlaegt buildx mit "invalid checksum digest
+# length" fehl. Scannt alle gestageten Textdateien (Lockfiles mit
+# --hash=sha256:... haben ebenfalls 64 Zeichen und bestehen den Check).
+# ---------------------------------------------------------------------------
+
+check_docker_digests() {
+  local files f out bad=0
+  if git diff --cached --quiet; then
+    echo "  keine gestageten Aenderungen, Scan uebersprungen"
+    return 0
+  fi
+  files="$(git diff --cached --name-only --diff-filter=ACM || true)"
+  if [[ -z "$files" ]]; then
+    echo "  keine gestageten Dateien"
+    return 0
+  fi
+  while IFS= read -r f; do
+    out="$(git show ":$f" 2>/dev/null | grep -InEo "$DIGEST_RE" | LC_ALL=C awk -v f="$f" '
+      {
+      if (!match($0, /^[0-9]+:/)) next
+      line = substr($0, 1, RLENGTH - 1)
+      tok = substr($0, RLENGTH + 1)
+      h = tok
+      sub(/^sha256:/, "", h)
+      if (length(h) != 64) { printf "%s:%s: %s\n", f, line, tok; bad = 1 }
+      }
+      END { exit bad }
+    ')"
+    if [[ -n "$out" ]]; then
+      echo "$out"
+      bad=1
+    fi
+  done <<< "$files"
+  if ((bad)); then
+    echo "  verboten: sha256-Digest ohne exakt 64 Hex-Zeichen (buildx bricht sonst mit invalid checksum digest length ab)" >&2
+    return 1
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Check-Registry — hier landen kuenftig weitere Checks
 # ---------------------------------------------------------------------------
 
 CHECKS=(
   check_gitleaks
   check_local_only
+  check_no_remote_ips
+  check_docker_digests
   check_typography
   check_helm
 )

@@ -131,8 +131,8 @@ def test_throttled_evicts_oldest_ip(monkeypatch):
     monkeypatch.setattr(main, "_TRIGGER_MAX_IPS", 3)
     monkeypatch.setattr(main, "TRIGGER_MAX_PER_WINDOW", 1000)
     for i in range(5):
-        assert main._throttled(f"10.0.0.{i}") is False
+        assert main._throttled(f"127.0.0.{i}") is False
     # nach 5 IPs bei Cap 3 sind die aeltesten evicten
     assert len(main._TRIGGERS) == 3
-    assert "10.0.0.0" not in main._TRIGGERS
-    assert "10.0.0.4" in main._TRIGGERS
+    assert "127.0.0.0" not in main._TRIGGERS
+    assert "127.0.0.4" in main._TRIGGERS
