@@ -20,8 +20,10 @@ def _env_float(name: str, default: float, lo: float, hi: float) -> float:
 
 SAMPLE_HZ = _env_float("METRIC_SAMPLE_HZ", 10.0, 1.0, 30.0)
 # Retention clamp 240 min (statt 1440): zusammen mit MAX_SAMPLES_CAP bleibt der
-# RAM-Ringbuffer unter dem Container-Limit (128Mi prod) — 1440 min x 30 Hz
-# waeren ~2,6 Mio Samples (~500 MB) und wuerden den Pod OOM-killen.
+# RAM-Ringbuffer klein gegen das Container-Limit — 1440 min x 30 Hz waeren
+# ~2,6 Mio Samples (~500 MB) und wuerden den Pod OOM-killen. Baseline des
+# Prozesses (uvicorn + forkserver + Producer) liegt bei ~183 MiB, das Limit
+# steht in charts/metric/values.yaml resources.
 RETENTION_MIN = int(_env_float("METRIC_RETENTION_MINUTES", 30.0, 1.0, 240.0))
 # Harter Cap fuer die Buffer-Groesse, unabhaengig von den Env-Werten
 # (~200k Samples a ~150-300 B = ~30-60 MB RAM).

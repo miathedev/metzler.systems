@@ -106,14 +106,16 @@ ingress:
         - metzler.systems
 resources:
   # 10 Samples/s gegen die K8s-API plus SSE-Broadcast brauchen etwas mehr als
-  # 100m CPU; der RAM-Ringbuffer (10 Hz * 30 min = 18000 Samples a ~150 B) ist
-  # dagegen vernachlässigbar (~3 MB).
+  # 100m CPU. RAM: Baseline ~183 MiB (uvicorn + Python 3.14 forkserver, der
+  # __main__ preloadet, + Producer-Child) — 128Mi hat den Pod OOM-killed.
+  # Plus RAM-Ringbuffer (Default 10 Hz * 30 min = 18000 Samples a ~150 B ~3 MB,
+  # hart gedeckelt via MAX_SAMPLES_CAP auf ~60 MB) -> 384Mi Limit mit Reserve.
   limits:
     cpu: 250m
-    memory: 128Mi
+    memory: 384Mi
   requests:
     cpu: 50m
-    memory: 64Mi
+    memory: 128Mi
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 # Probes zeigen auf /health (ohne K8s-API-Abhängigkeit), nicht auf
 # /state — sonst wird der Pod NotReady, sobald metrics.k8s.io hakt.
