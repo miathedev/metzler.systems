@@ -17,7 +17,7 @@ image:
   # "latest" existiert ab dem ersten CI-Lauf auf main, danach bumped die CI
   # auf sha-<commit> (immutable tags). appVersion als Fallback würde auf ein
   # nie gepushtes Image zeigen.
-  tag: "sha-a05cf1b"
+  tag: "sha-fd5a451"
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
 # This is to override the chart name.
