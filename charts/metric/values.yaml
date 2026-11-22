@@ -16,18 +16,16 @@ image:
   # "latest" existiert ab dem ersten CI-Lauf auf main, danach bumped die CI
   # auf sha-<commit> (immutable tags). appVersion als Fallback würde auf ein
   # nie gepushtes Image zeigen.
-  tag: "latest"
+  tag: "sha-9dd1355"
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
 # This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
-
 # Oeffentliches Präfix des Ingress. uvicorn --root-path wird darueber gesetzt
 # (nur Logging/URL-Generierung, strippt NICHT selbst), das eigentliche Stripping
 # macht die StripPrefix-Middleware aus templates/middleware.yaml.
 rootPath: /api/metrics
-
 # Realtime-Sampling: der Pod sampled metrics.k8s.io mit METRIC_SAMPLE_HZ (1-30/s,
 # "30fps"-Streaming per SSE /stream), haelt die Samples METRIC_RETENTION_MINUTES
 # lang in einem RAM-Ringbuffer (serviert per /history) und pusht sie live an
@@ -35,7 +33,6 @@ rootPath: /api/metrics
 env:
   METRIC_SAMPLE_HZ: "10"
   METRIC_RETENTION_MINUTES: "30"
-
 #This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
   # Specifies whether a service account should be created
@@ -128,11 +125,9 @@ readinessProbe:
   httpGet:
     path: /health
     port: http
-
 # Zusätzliche Volumes und Mounts
 volumes: []
 volumeMounts: []
-
 # NetworkPolicy (templates/networkpolicy.yaml): default-deny, Ingress nur von
 # Traefik, Egress nur DNS + K8s-API.
 networkPolicy:
@@ -147,7 +142,6 @@ networkPolicy:
   # (Calico) — in prod setzt das Secret `k8s-api-endpoint` beides.
   k8sApiPorts:
     - 443
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
