@@ -51,8 +51,8 @@ spec:
     {{- end }}
 {{- end }}
 {{- if .Values.ingress.enabled }}
-{{- range required "ingress.rateLimitPaths fehlt in den values" .Values.ingress.rateLimitPaths }}
-{{- $slug := .path | trimPrefix "/" | replace "/" "-" | replace "." "-" }}
+{{- range $rl := required "ingress.rateLimitPaths fehlt in den values" .Values.ingress.rateLimitPaths }}
+{{- $slug := $rl.path | trimPrefix "/" | replace "/" "-" | replace "." "-" }}
 ---
 # Pro geschuetztem Pfad ein eigener Exact-Ingress mit StripPrefix + RateLimit
 # (Werte siehe ingress.rateLimitPaths in values.yaml). Exact gewinnt gegen den
@@ -88,7 +88,7 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          - path: {{ .path }}
+          - path: {{ $rl.path }}
             pathType: Exact
             backend:
               service:
