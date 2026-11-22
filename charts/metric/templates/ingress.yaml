@@ -2,7 +2,7 @@
 # plus pro ingress.rateLimitPaths-Eintrag ein Exact-Ingress mit zusaetzlichem
 # RateLimit. Kein eigener LoadBalancer: beide hängen am bestehenden
 # Traefik-LoadBalancer (Service traefik im Namespace traefik).
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
