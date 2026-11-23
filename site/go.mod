@@ -1,3 +1,4 @@
+// go.mod: Go-Modul der Hugo-Site (Hugo-Module).
 module github.com/miathedev/metzler.systems/site
 
 go 1.19

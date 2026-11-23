@@ -1,4 +1,4 @@
-# Allow search engines and AI answer engines; block model-training crawlers.
+# Suchmaschinen und KI-Antwortmaschinen erlauben, Modell-Training-Crawler blocken.
 User-agent: *
 Allow: /
 

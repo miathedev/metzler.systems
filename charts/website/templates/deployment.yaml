@@ -1,3 +1,4 @@
+# deployment.yaml: Deployment der website (nginx-unprivileged-Image aus site/Dockerfile).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

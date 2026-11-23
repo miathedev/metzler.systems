@@ -28,7 +28,9 @@ log() { printf '\n==> %s\n' "$*"; }
 
 for t in docker kind helm kubectl curl sha256sum git ss; do dev_need "$t"; done
 
-# --- mkcert nach .bin/ installieren (sha256 gepinnt, siehe pre-commit.sh-Muster)
+# ---------------------------------------------------------------------------
+# mkcert nach .bin/ installieren (sha256 gepinnt, siehe pre-commit.sh-Muster)
+# ---------------------------------------------------------------------------
 mkcert_bin() {
   if command -v mkcert >/dev/null 2>&1; then
     command -v mkcert
@@ -72,7 +74,9 @@ if ! MKCERT="$(mkcert_bin)"; then
   MKCERT="$LOCAL_BIN/mkcert"
 fi
 
-# --- /etc/hosts: Hostname lokal aufloesen -----------------------------------
+# ---------------------------------------------------------------------------
+# /etc/hosts: Hostname lokal aufloesen
+# ---------------------------------------------------------------------------
 log "/etc/hosts-Eintrag fuer $DEV_HOST"
 if grep -Eq "^[[:space:]]*127\.0\.0\.1[[:space:]].*\b${DEV_HOST}\b" /etc/hosts; then
   echo "    bereits vorhanden"
@@ -86,7 +90,9 @@ else
   echo "    -> Eintrag manuell setzen fuer Browser-URLs, Smoke-Test unten nutzt --resolve" >&2
 fi
 
-# --- TLS-Cert fuer $DEV_HOST via mkcert ---------------------------------------
+# ---------------------------------------------------------------------------
+# TLS-Cert fuer $DEV_HOST via mkcert
+# ---------------------------------------------------------------------------
 log "TLS-Cert fuer $DEV_HOST (mkcert, CA liegt in dev/certs/)"
 mkdir -p "$CAROOT"
 # Private Keys liegen unverschluesselt in dev/certs — Ordner auf 700 ziehen.
@@ -108,7 +114,9 @@ if [[ ! -f "$CAROOT/.ca-installed" ]]; then
   fi
 fi
 
-# --- Host-Ports: 80/443 oder Fallback 8080/8443 -------------------------------
+# ---------------------------------------------------------------------------
+# Host-Ports: 80/443 oder Fallback 8080/8443
+# ---------------------------------------------------------------------------
 # Der Fallback gilt nur beim NEUANLEGEN des Clusters: existiert er bereits,
 # wurden die Host-Ports bei seiner Erstellung festgelegt und bleiben — der
 # damalige Marker .https-port sagt, welcher Port beschrieben ist.
@@ -144,7 +152,9 @@ fi
 PORT_SUFFIX=""
 [[ "$HTTPS_PORT" != "443" ]] && PORT_SUFFIX=":$HTTPS_PORT"
 
-# --- kind-Cluster -------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# kind-Cluster
+# ---------------------------------------------------------------------------
 # Vorherigen Kontext VOR kind create merken — kind setzt current-context auf
 # kind-dev, danach waere die Restore-Information in teardown.sh falsch.
 PREV_CONTEXT="$(kubectl config current-context 2>/dev/null || true)"
@@ -159,7 +169,9 @@ if [[ "$KIND_CONFIG" == /tmp/kind-config-dev-* ]]; then
   rm -f "$KIND_CONFIG"
 fi
 
-# --- Kontext-Umschaltung auf kind-dev (alle weiteren Aufrufe nur dort) --------
+# ---------------------------------------------------------------------------
+# Kontext-Umschaltung auf kind-dev (alle weiteren Aufrufe nur dort)
+# ---------------------------------------------------------------------------
 kubectl config use-context "$DEV_CONTEXT"
 # .prev-context nur merken, wenn sie vom kind-Kontext verschieden ist — ein
 # Re-Run von setup.sh wuerde sonst "kind-dev" als Vorgaenger speichern und
@@ -170,7 +182,9 @@ fi
 dev_require_kind_context
 echo "    kubectl-Kontext: $DEV_CONTEXT (zuvor: ${PREV_CONTEXT:-<leer>})"
 
-# --- Helm-Repos ---------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Helm-Repos
+# ---------------------------------------------------------------------------
 helm repo add traefik https://traefik.github.io/charts >/dev/null 2>&1 || true
 helm repo add kyverno https://kyverno.github.io/helm-charts >/dev/null 2>&1 || true
 helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ >/dev/null 2>&1 || true
@@ -180,14 +194,17 @@ wait_ns() {
   kubectl wait --for=condition=ready pod -n "$1" --all --timeout=300s
 }
 
-# --- Kyverno zuerst (wie prod), dann warten bis der Webhook steht -------------
+# ---------------------------------------------------------------------------
+# Kyverno zuerst (wie prod), dann warten bis der Webhook steht
+# ---------------------------------------------------------------------------
 log "Kyverno installieren (Version wie prod)"
 helm upgrade --install kyverno kyverno/kyverno -n kyverno --create-namespace \
   --version 3.10.0 -f "$DEV_DIR/values/kyverno.yaml"
 wait_ns kyverno
 
-# --- Traefik + metrics-server (vor den Policies, damit die ValidatingPolicy
-# --- die Infra-Charts nicht blockieren kann) ----------------------------------
+# ---------------------------------------------------------------------------
+# Traefik + metrics-server (vor den Policies, damit die ValidatingPolicy die Infra-Charts nicht blockieren kann)
+# ---------------------------------------------------------------------------
 log "Traefik installieren (Version wie prod)"
 helm upgrade --install traefik traefik/traefik -n traefik --create-namespace \
   --version 42.4.0 -f "$DEV_DIR/values/traefik.yaml"
@@ -199,11 +216,15 @@ helm upgrade --install metrics-server metrics-server/metrics-server -n kube-syst
 kubectl wait -n kube-system --for=condition=ready pod \
   -l app.kubernetes.io/name=metrics-server --timeout=300s
 
-# --- Kyverno-Policies aus dem Repo --------------------------------------------
+# ---------------------------------------------------------------------------
+# Kyverno-Policies aus dem Repo
+# ---------------------------------------------------------------------------
 log "Kyverno-Policies installieren (charts/kyverno-policies)"
 helm upgrade --install kyverno-policies "$DEV_REPO_ROOT/charts/kyverno-policies" -n kyverno
 
-# --- TLS-Secrets aus dem mkcert-Cert ------------------------------------------
+# ---------------------------------------------------------------------------
+# TLS-Secrets aus dem mkcert-Cert
+# ---------------------------------------------------------------------------
 log "TLS-Secrets website-tls / metric-tls / load-tls im Namespace $DEV_NS"
 kubectl create namespace "$DEV_NS" --dry-run=client -o yaml | kubectl apply -f -
 # StripPrefix-Middlewares kommen aus den Charts selbst (templates/middleware.yaml)
@@ -213,7 +234,9 @@ for s in website-tls metric-tls load-tls; do
     --dry-run=client -o yaml | kubectl apply -f -
 done
 
-# --- website + metric + load: Images lokal bauen, in kind laden, deployen ----
+# ---------------------------------------------------------------------------
+# website + metric + load: Images lokal bauen, in kind laden, deployen
+# ---------------------------------------------------------------------------
 # Kein ghcr-Pull: die Images entstehen aus dem lokalen Code (tag dev,
 # pullPolicy Never in den dev/values). dev-image.sh all baut alle und
 # deployt per helm upgrade --install.
@@ -221,13 +244,17 @@ log "Images lokal bauen + website/metric/load deployen (dev/dev-image.sh all)"
 "$DEV_DIR/dev-image.sh" all
 wait_ns "$DEV_NS"
 
-# --- Helm-Tests (test-connection-Hooks) ---------------------------------------
+# ---------------------------------------------------------------------------
+# Helm-Tests (test-connection-Hooks)
+# ---------------------------------------------------------------------------
 log "helm test"
 helm test website -n "$DEV_NS" --logs
 helm test metric -n "$DEV_NS" --logs
 helm test load -n "$DEV_NS" --logs
 
-# --- Smoke-Test durch den Ingress (curl --resolve, braucht keinen /etc/hosts-Eintrag)
+# ---------------------------------------------------------------------------
+# Smoke-Test durch den Ingress (curl --resolve, braucht keinen /etc/hosts-Eintrag)
+# ---------------------------------------------------------------------------
 log "Smoke-Test durch den Ingress"
 curl -fsS --resolve "$DEV_HOST:$HTTPS_PORT:127.0.0.1" --cacert "$CAROOT/rootCA.pem" \
   "https://$DEV_HOST$PORT_SUFFIX/api/metrics/health" && echo

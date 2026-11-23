@@ -53,3 +53,6 @@ site/assets/dist/
 # Auto-generierte JS-Config (Pfade zeigen in den lokalen Hugo-Modulcache,
 # stimmen auf CI/Docker nicht) — wird von Hugo selbst nicht gelesen, nur Editor.
 site/assets/jsconfig.json
+
+# Meine TODO Liste
+TODO.md

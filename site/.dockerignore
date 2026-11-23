@@ -1,3 +1,4 @@
+# .dockerignore: Pfade, die der site-Docker-Build ausschliesst.
 .git
 node_modules
 public

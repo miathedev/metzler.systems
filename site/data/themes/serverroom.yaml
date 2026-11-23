@@ -1,7 +1,7 @@
-# Custom theme pack for metzler.systems, "server room at night".
-# Ink-tinted neutral surfaces (unslop tokens, ink ramp) with a single
-# LED-amber accent taken from the world (status LEDs, terminal glow).
-# Replaces the "synthwave" pack (deep-purple background, neon pink/cyan).
+# serverroom.yaml: eigenes Theme-Paket fuer metzler.systems (Serverraum bei Nacht).
+# Tintengetönte neutrale Flächen (unslop-Tokens, Ink-Rampe) mit einem einzelnen
+# LED-Amber-Akzent aus der echten Welt (Status-LEDs, Terminal-Glühen).
+# Ersetzt das Paket "synthwave" (tiefvioletter Hintergrund, Neon-Pink/Cyan).
 
 hugoblox:
   meta:
@@ -16,17 +16,17 @@ hugoblox:
 
   dark:
     colors:
-      primary: "amber"    # LED amber, the one accent: status dot, selection, key figures
-      secondary: "teal"   # only where a second hue is truly needed
+      primary: "amber"    # LED-Amber, der eine Akzent: Status-Punkt, Selektion, Kennzahlen
+      secondary: "teal"   # nur wo ein zweiter Farbton wirklich nötig ist
     surfaces:
-      background: "#0b0d14"   # ink page background
-      foreground: "#eef0f5"   # ink primary text
+      background: "#0b0d14"   # Tinten-Seitenhintergrund
+      foreground: "#eef0f5"   # Tinten-Haupttext
       header:
         background: "#0b0d14"
         foreground: "#eef0f5"
       footer:
-        background: "#07080d"   # deepest surface
-        foreground: "#7a8296"   # ink muted text
+        background: "#07080d"   # dunkelste Fläche
+        foreground: "#7a8296"   # Tinten-dezenter Text
 
   light:
     colors:

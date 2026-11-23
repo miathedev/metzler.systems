@@ -1,4 +1,4 @@
-{{/* Light mode is removed site-wide: theme.mode is fixed to 'dark' and the header theme toggle/picker are disabled. This runs before hb-head.js, so initTheme() finds no stored preference and always applies the dark default — stale 'wc-color-theme'/'hb-theme-pack' entries from before the change are discarded. */}}
+{{/* Light Mode ist site-weit entfernt: theme.mode steht fest auf 'dark', Header-Toggle/Picker sind deaktiviert. Laeuft vor hb-head.js, sodass initTheme() keine gespeicherte Praeferenz findet und immer das dunkle Default setzt — veraltete 'wc-color-theme'/'hb-theme-pack'-Eintraege von vor der Umstellung werden verworfen. */}}
 <script>
   localStorage.removeItem("wc-color-theme");
   localStorage.removeItem("hb-theme-pack");

@@ -132,6 +132,10 @@ check_gitleaks() {
   "$bin" protect --staged --redact --no-banner --verbose
 }
 
+# ---------------------------------------------------------------------------
+# commit_msg — erste Zeile der Commit-Message gegen COMMIT_MSG_PATTERN pruefen
+# ---------------------------------------------------------------------------
+
 check_commit_msg() {
   if [[ -z "$MSG_FILE" || ! -f "$MSG_FILE" ]]; then
     echo "  kein Commit-Message-File uebergeben (Aufruf: pre-commit.sh commit-msg <file>)" >&2
@@ -366,6 +370,90 @@ check_docker_digests() {
 }
 
 # ---------------------------------------------------------------------------
+# file_headers — jede gestagete handgeschriebene Datei beginnt mit einem
+# Kommentar-Kopf aus Dateiname und Zweck, mit dem richtigen Zeichen pro
+# Dateityp. Ausgenommen sind Fremdcode,
+# Lockfiles, generierte Dateien und strikt valides JSON (SKIP_PATTERNS unten).
+# Ausserdem duerfen gestagete Dateien keine Stub-Marker enthalten (TODO, FIXME
+# oder HACK mit Doppelpunkt, damit die Regel sich nicht selbst matcht).
+# ---------------------------------------------------------------------------
+
+check_file_headers() {
+  local files f expect head ok bad=0 todos
+  if git diff --cached --quiet; then
+    echo "  keine gestageten Aenderungen, Check uebersprungen"
+    return 0
+  fi
+  files="$(git diff --cached --name-only --diff-filter=ACMR || true)"
+  if [[ -z "$files" ]]; then
+    echo "  keine gestageten Dateien"
+    return 0
+  fi
+  while IFS= read -r f; do
+    case "$f" in
+      # Fremdcode, Lockfiles, generierte/valide-JSON-Dateien sind ausgenommen
+      node_modules/*|site/public/*|.bin/*|\
+      site/layouts/_partials/hbx/*|site/layouts/_partials/views/*|site/layouts/_partials/components/*|\
+      site/assets/js/hbx/*|site/config/_default/*|site/hugoblox.yaml|\
+      charts/*/Chart.yaml|charts/*/values.yaml|charts/*/.helmignore|charts/*/templates/_helpers.tpl|\
+      flux/cluster/infomaniak/gotk-components.yaml|\
+      site/content/*|LICENSE*|site/LICENSE.md|\
+      *pnpm-lock.yaml|*package-lock.json|*go.sum|*requirements*.txt|*.json)
+        continue ;;
+    esac
+    case "$f" in
+      *.py)            expect="py" ;;
+      *.sh|*.bash)     expect="hash-after-shebang" ;;
+      *.yaml|*.yml|*.toml|*.npmrc|*.dockerignore|Dockerfile*|.gitignore) expect="hash" ;;
+      *robots.txt)     expect="hash" ;;
+      *.js|*.ts|*.go|go.mod) expect="slash" ;;
+      *.html)          expect="html" ;;
+      *.tpl|*.txt|*.md.md) expect="go" ;;
+      *.md)            expect="hash" ;;
+      *)               continue ;;  # unbekannte Typen nicht raten
+    esac
+    head="$(git show ":$f" 2>/dev/null | head -n 4)"
+    ok=0
+    case "$expect" in
+      hash)
+        head -n1 <<<"$head" | grep -q '^#' && ok=1 ;;
+      hash-after-shebang)
+        if head -n1 <<<"$head" | grep -q '^#!'; then
+          tail -n +2 <<<"$head" | grep -q '^#' && ok=1
+        else
+          head -n1 <<<"$head" | grep -q '^#' && ok=1
+        fi ;;
+      py)
+        if head -n1 <<<"$head" | grep -q '^#!'; then
+          tail -n +2 <<<"$head" | grep -qE '^(#|""")' && ok=1
+        else
+          head -n1 <<<"$head" | grep -qE '^(#|""")' && ok=1
+        fi ;;
+      slash) head -n1 <<<"$head" | grep -qE '^(//|/\*)' && ok=1 ;;
+      html)  grep -qE '^(<!--|\{\{)' <<<"$head" && ok=1 ;;  # Hugo-Templates tragen {{/* */}}, reines HTML <!-- -->
+      go)    head -n1 <<<"$head" | grep -q '^{{' && ok=1 ;;
+    esac
+    if ((! ok)); then
+      echo "  $f: Datei-Kopf fehlt (erwartet $expect-Kommentar in den ersten Zeilen)"
+      bad=1
+    fi
+    todos="$(git show ":$f" 2>/dev/null | grep -nE '\b(TODO|FIXME|HACK):' | head -n 3 || true)"
+    if [[ -n "$todos" ]]; then
+      printf '%s\n' "$todos" | awk -v f="$f" '{print f ":" $0}'
+      bad=1
+    fi
+  done <<< "$files"
+  if ((bad)); then
+    {
+      echo "  verboten: Datei ohne Kopf-Kommentar bzw. Stub-Marker (TODO, FIXME, HACK mit Doppelpunkt)"
+      echo "  Fremdcode/Lockfiles/JSON sind ausgenommen (siehe check_file_headers in pre-commit.sh)"
+    } >&2
+    return 1
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------------------
 # Check-Registry — hier landen kuenftig weitere Checks
 # ---------------------------------------------------------------------------
 
@@ -374,6 +462,7 @@ CHECKS=(
   check_local_only
   check_no_remote_ips
   check_docker_digests
+  check_file_headers
   check_typography
   check_helm
 )

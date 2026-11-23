@@ -1,6 +1,6 @@
-{{- /* Render the e-mail address as an image (spam protection). The address itself
-       must not appear as text anywhere in the site source or output.
-       Usage: {{< email >}} or {{< email img="kontakt" >}} */ -}}
+{{- /* E-Mail-Adresse als Bild rendern (Spam-Schutz). Die Adresse selbst darf
+       nirgends im Site-Quelltext oder Output als Text stehen.
+       Aufruf: {{< email >}} oder {{< email img="kontakt" >}} */ -}}
 {{- $f := .Get "img" | default "mia" -}}
 <style>.hb-email-img{height:1.15em;width:auto;vertical-align:-0.18em}.dark .hb-email-img{filter:invert(1)}</style>
 <img class="hb-email-img" src="/images/email-{{ $f }}.png" alt="E-mail address" />

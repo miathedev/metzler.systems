@@ -1,3 +1,4 @@
+# gotk-sync.yaml: GitRepository + Kustomization, von flux install generiert und manuell um HelmReleases erweitert (DO-NOT-EDIT-Marker des generierten Teils siehe gotk-components.yaml).
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:

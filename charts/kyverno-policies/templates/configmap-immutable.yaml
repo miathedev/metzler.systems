@@ -1,3 +1,4 @@
+# configmap-immutable.yaml: Kyverno-Policy, ConfigMaps duerfen nach Erstellung nicht mehr geaendert werden.
 {{- if .Values.configMapImmutable.enabled }}
 # Seit Kyverno 1.20 werden legacy kyverno.io/v1 Policies nicht mehr ausgeführt.
 # In policies.kyverno.io gibt es kein ClusterPolicy — die CEL-Äquivalente sind

@@ -1,4 +1,5 @@
-{{- if .Values.ingress.enabled -}}
+# ingress.yaml: Ingress der website (Traefik, TLS via cert-manager).
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

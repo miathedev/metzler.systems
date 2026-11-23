@@ -1,3 +1,4 @@
+# me.yaml: Autorenprofil der Inhaberin (HugoBlox author/v1).
 schema: hugoblox/author/v1
 slug: me
 is_owner: true

@@ -1,3 +1,4 @@
+{{- /* index.llms.txt: maschinenlesbarer Einstiegspunkt der Site (llms.txt). */ -}}
 # {{ site.Title }}
 {{- with site.Params.hugoblox.identity.description }}
 > {{ . }}

@@ -1,3 +1,4 @@
+# clusterissuer.yaml: ein ClusterIssuer pro Eintrag in values.clusterIssuers.
 {{- range .Values.clusterIssuers }}
 {{- if .enabled }}
 apiVersion: cert-manager.io/v1

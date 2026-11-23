@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Local dev server for the Hugo site.
+# run.sh: lokaler Dev-Server fuer die Hugo-Site.
 #
-#   ./run.sh            start hugo server (http://localhost:1313)
-#   ./run.sh build      production build into public/ (hugo --minify)
-#   ./run.sh --port 8080 ...   any hugo server flags are passed through
+#   ./run.sh            startet hugo server (http://localhost:1313)
+#   ./run.sh build      Produktions-Build nach public/ (hugo --minify)
+#   ./run.sh --port 8080 ...   alle hugo-server-Flags werden durchgereicht
 #
 set -euo pipefail
 cd "$(dirname "$0")"
 
-# The VS Code extension directory leaks an incompatible libstdc++ into
-# LD_LIBRARY_PATH, which makes the hugo binary crash with GLIBCXX errors.
-# Start with a clean library path.
+# Das VS-Code-Extension-Verzeichnis leakt ein inkompatibles libstdc++ in
+# LD_LIBRARY_PATH, dadurch crasht das hugo-Binary mit GLIBCXX-Fehlern.
+# Deshalb mit sauberem Library-Pfad starten.
 unset LD_LIBRARY_PATH
-# Never let stray env vars override the configured baseURL.
+# Niemals zulassen, dass fremde Env-Vars die konfigurierte baseURL ueberschreiben.
 unset HUGO_BASEURL HUGO_ENV
 
 HUGO=/usr/bin/hugo
@@ -25,6 +25,6 @@ if [ "${1:-}" = "build" ]; then
   exec "$HUGO" --minify --cleanDestinationDir "$@"
 fi
 
-# --renderToMemory: the dev server must never clobber public/ with a
-# localhost:1313 build (hugo server otherwise writes to the destination).
+# --renderToMemory: der Dev-Server darf public/ nie mit einem
+# localhost:1313-Build ueberschreiben (hugo server schreibt sonst ins Ziel).
 exec "$HUGO" server --disableFastRender --renderToMemory "$@"
