@@ -1,3 +1,4 @@
+# ---------------------------------------------------------------------------
 # Admission Controller
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -28,6 +29,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # cert-manager
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -59,6 +61,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # ClusterIssuer (Let's Encrypt staging+prod)
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -90,7 +93,11 @@ spec:
     remediation:
       retries: 3
 ---
-# Traefik Ingress-Controller
+# ---------------------------------------------------------------------------
+# Traefik Ingress-Controller als DaemonSet: ein Pod pro Node. Der LoadBalancer
+# (Service traefik) hat damit auf jedem Node einen lokalen Endpunkt, und
+# Scale-down/Redeploy einzelner Autoscaler-Nodes (vpa-Nodepool) erzeugen keine
+# Ingress-Ausfaelle mehr, solange mindestens ein Node Ready ist.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -108,6 +115,14 @@ spec:
         namespace: flux-system
       interval: 1m0s
   values:
+    deployment:
+      kind: DaemonSet
+    service:
+      spec:
+        # Erst mit DaemonSet auf jedem Node sicher: Client-IP bleibt erhalten
+        # (sonst SNAT beim Cross-Node-Forwarding) und Nodes ohne lokalen
+        # Traefik-Pod fallen ueber den LB-Health-Check aus dem Pool.
+        externalTrafficPolicy: Local
     ingressClass:
       enabled: true
       name: traefik
@@ -122,6 +137,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # Kyverno ClusterPolicies
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -148,6 +164,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # metrics-server (metrics.k8s.io API für kubectl top und die metric-App)
 # Infomaniak-KaaS-Sonderlocken (Details inline, damit keine lokalen Doku-Namen ins Repo wandern):
 # Kubelet-Serving-Certs haben keine IP-SANs und Node-Hostnames sind aus dem
@@ -183,6 +200,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # Metrics-API (Namespace website, metzler.systems/api/metrics hängt am
 # bestehenden Traefik-LoadBalancer, kein eigener LoadBalancer)
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -224,6 +242,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # Webseite
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -253,6 +272,7 @@ spec:
     remediation:
       retries: 3
 ---
+# ---------------------------------------------------------------------------
 # Load-Service (Namespace website, metzler.systems/api/load hängt am
 # bestehenden Traefik-LoadBalancer): kuenstlicher Last-Trigger fuer die
 # website (POST /api/load/ = 5-min-Run, 409 solange aktiv). RBAC nur
