@@ -59,6 +59,14 @@ education:
       cum laude, Internet of Things 29/30.
 
 experience:
+  - role: Freelance Infrastructure Engineer
+    org: Leo Skull GmbH
+    start: 2025-08-01
+    end: 2026-08-01
+    summary: |
+      Operation of the production cluster migrated from Google Cloud to self-hosted
+      Kubernetes as a freelance side activity alongside full-time employment:
+      maintenance, consulting and support.
   - role: System Engineer & DevOps Engineer
     org: bpm consult ag
     start: 2024-04-01
@@ -70,16 +78,17 @@ experience:
       platform with CI/CD, HA reverse-proxy cluster against bot/DDoS traffic, internal
       PKI with offline root CA, HashiCorp Vault, hardware-key MFA, credential rotation,
       blameless postmortems, 2026 technology budget.
-  - role: Infrastructure Engineer (freelance cluster operation since Apr 2024)
+  - role: Infrastructure Engineer
     org: Leo Skull GmbH
     start: 2023-06-01
+    end: 2024-03-01
     summary: |
       Migrated production infrastructure from Google Cloud to a cost-efficient
       self-hosted Kubernetes cluster, HA SaaS environments with automated failover and
       load balancing, PHP/Laravel apps with RabbitMQ and MongoDB ported into the
       cluster, Prometheus/Grafana/Loki monitoring, shift-left security scans in GitLab
-      CI/CD, Ansible/Bash automation, SD-WAN and corporate networks. Since April 2024 I
-      keep operating the migrated cluster as a freelancer.
+      CI/CD, Ansible/Bash automation, backend APIs in Python and PHP, SD-WAN and
+      corporate networks.
   - role: DevOps and Embedded Systems
     org: engram GmbH
     start: 2019-01-01

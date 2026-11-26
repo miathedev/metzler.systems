@@ -133,6 +133,17 @@ sections:
       title: Experience
       date_format: Jan 2006
       items:
+        - title: Freelance Infrastructure Engineer
+          company: Leo Skull GmbH
+          company_url: ''
+          company_logo: ''
+          location: Oldenburg, DE
+          date_start: '2025-08-01'
+          date_end: '2026-08-01'
+          description: |2-
+            * Operation of the production cluster migrated from Google Cloud to self-hosted Kubernetes, as a freelance side activity alongside full-time employment
+            * Maintenance, consulting and support
+            * Tech stack: Kubernetes, Ansible, Bash, GitLab CI/CD
         - title: System Engineer & DevOps Engineer
           company: bpm consult ag
           company_url: https://www.bpm-consult.com/
@@ -147,19 +158,19 @@ sections:
             * Highly available active/active container platform with CI/CD, central logging and backups
             * Security hardening: internal PKI with offline root CA, HashiCorp Vault, hardware-key MFA, credential rotation, blameless postmortems
             * Tech stack: Linux, Ansible, Python, GitLab CI/CD, Prometheus, Grafana, Vault
-        - title: Infrastructure Engineer, freelance cluster operation since Apr 2024
+        - title: Infrastructure Engineer
           company: Leo Skull GmbH
           company_url: ''
           company_logo: ''
           location: Oldenburg, DE
           date_start: '2023-06-01'
-          date_end: ''
+          date_end: '2024-03-01'
           description: |2-
             * Migrated production infrastructure from Google Cloud to a cost-efficient self-hosted Kubernetes cluster
             * HA SaaS environments with automated failover and load balancing, PHP/Laravel apps with RabbitMQ and MongoDB ported into the cluster
             * Monitoring with Prometheus, Grafana, Loki, shift-left security scans in GitLab CI/CD
+            * Automation with Ansible and Bash, backend APIs in Python and PHP
             * Architecture and operation of SD-WAN and corporate networks
-            * Since 04/2024: freelance operation of the migrated cluster, maintenance, consulting, support
             * Tech stack: Kubernetes, Docker, Ansible, Bash, Python, GitLab CI/CD
         - title: DevOps and Embedded Systems
           company: engram GmbH
