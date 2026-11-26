@@ -9,18 +9,20 @@ main:
   - name: Live
     url: /#live
     weight: 8
-  - name: Projects
-    url: /#projects
-    weight: 10
+  # Ausgeblendet, weil der Abschnitt #projects auf der Startseite deaktiviert ist
+  # - name: Projects
+  #   url: /#projects
+  #   weight: 10
   - name: Skills
     url: /#skills
     weight: 20
   - name: Experience
     url: /#experience
     weight: 30
-  - name: Blog
-    url: /#blog
-    weight: 40
+  # Ausgeblendet, weil der Abschnitt #blog auf der Startseite deaktiviert ist
+  # - name: Blog
+  #   url: /#blog
+  #   weight: 40
   - name: Contact
     url: /#contact
     weight: 50

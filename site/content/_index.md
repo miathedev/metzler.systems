@@ -24,10 +24,11 @@ sections:
         type_speed: 70
         delete_speed: 40
         pause_time: 2500
-      cta_buttons:
-        - text: View projects
-          url: "#projects"
-          icon: arrow-down
+      # CTA deaktiviert, weil das Ziel #projects mit dem Featured-projects-Block ausgeblendet ist
+      # cta_buttons:
+      #   - text: View projects
+      #     url: "#projects"
+      #     icon: arrow-down
     design:
       style: centered
       avatar_shape: circle
@@ -49,29 +50,30 @@ sections:
         padding: ["3rem", "0", "4rem", "0"]
 
   # Filterable Portfolio - Alpine.js powered project filtering
-  - block: portfolio
-    id: projects
-    content:
-      title: "Featured projects"
-      subtitle: "Infrastructure, embedded and homelab projects I built and run"
-      count: 6
-      filters:
-        folders:
-          - projects
-      buttons:
-        - name: All
-          tag: '*'
-        - name: Kubernetes
-          tag: Kubernetes
-        - name: DevOps
-          tag: DevOps
-        - name: Homelab
-          tag: Homelab
-      default_button_index: 0
-    design:
-      columns: 2
-      spacing:
-        padding: ["4rem", "0", "4rem", "0"]
+  # Ausgeblendet statt entfernt, damit der Block später wieder aktivierbar ist
+  # - block: portfolio
+  #   id: projects
+  #   content:
+  #     title: "Featured projects"
+  #     subtitle: "Infrastructure, embedded and homelab projects I built and run"
+  #     count: 6
+  #     filters:
+  #       folders:
+  #         - projects
+  #     buttons:
+  #       - name: All
+  #         tag: '*'
+  #       - name: Kubernetes
+  #         tag: Kubernetes
+  #       - name: DevOps
+  #         tag: DevOps
+  #       - name: Homelab
+  #         tag: Homelab
+  #     default_button_index: 0
+  #   design:
+  #     columns: 2
+  #     spacing:
+  #       padding: ["4rem", "0", "4rem", "0"]
 
   # Visual Tech Stack - Icons organized by category
   - block: tech-stack
@@ -200,23 +202,24 @@ sections:
         padding: ["4rem", "0", "4rem", "0"]
 
   # Recent Blog Posts
-  - block: collection
-    id: blog
-    content:
-      title: Recent posts
-      subtitle: 'Notes from production: Kubernetes, Linux, observability'
-      text: ''
-      filters:
-        folders:
-          - blog
-        exclude_featured: false
-      count: 3
-      order: desc
-    design:
-      view: card
-      columns: 3
-      spacing:
-        padding: ["4rem", "0", "4rem", "0"]
+  # Ausgeblendet bis genug Artikel da sind, Block bleibt zur Reaktivierung erhalten
+  # - block: collection
+  #   id: blog
+  #   content:
+  #     title: Recent posts
+  #     subtitle: 'Notes from production: Kubernetes, Linux, observability'
+  #     text: ''
+  #     filters:
+  #       folders:
+  #         - blog
+  #       exclude_featured: false
+  #     count: 3
+  #     order: desc
+  #   design:
+  #     view: card
+  #     columns: 3
+  #     spacing:
+  #       padding: ["4rem", "0", "4rem", "0"]
 
   # Contact Section
   - block: contact-info
