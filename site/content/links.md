@@ -9,9 +9,8 @@ Just links. Everything below is mine.
 
 | Project | What it does | Language |
 | --- | --- | --- |
-| [cluster-departure](https://github.com/miathedev/cluster-departure) | A train-departure board for your Kubernetes cluster, live pod/node metrics from metrics-server | Python |
+| [mpc-vst-jamclock](https://github.com/miathedev/mpc-vst-jamclock) | JamClock: VST insert for Akai MPC that beat-tracks live band audio and syncs the sequencer via MIDI Clock (external sync), bit-identical passthrough | C |
 | [ubuntu-cloud-images-lvm](https://github.com/miathedev/ubuntu-cloud-images-lvm) | Ubuntu cloud images converted to LVM | Shell |
-| [adafruit-aht10](https://github.com/miathedev/adafruit-aht10) | Rust port of Adafruit's AHT10 temperature/humidity sensor library | Rust |
 | [metzler.systems](https://github.com/miathedev/metzler.systems) | This website, Hugo -> GHCR -> Flux/Helm/Kyverno (GitOps) | Hugo |
 
 ## Profiles
