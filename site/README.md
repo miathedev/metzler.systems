@@ -37,7 +37,7 @@ PATH="$PWD/node_modules/.bin:$PATH" hugo --minify
 
 | Pfad | Zweck |
 |---|---|
-| `content/` | Deine Inhalte als Markdown ( `_index.md` = Startseite, `projects/`, `blog/`, `authors/`) |
+| `content/` | Deine Inhalte als Markdown ( `_index.md` = Startseite, `projects/`, `authors/`) |
 | `config/_default/hugo.yaml` | Hugo-Basics: `title`, `baseURL`, Ausgabeformate |
 | `config/_default/params.yaml` | HugoBlox-Config: Name, Tagline, Farben, Theme, Features |
 | `config/_default/menus.yaml` | Navigation |

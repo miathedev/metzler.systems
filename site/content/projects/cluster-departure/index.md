@@ -14,9 +14,6 @@ links:
   - type: github
     url: https://github.com/miathedev/cluster-departure
     label: Code
-  - type: site
-    url: /blog/2026-11-17-cluster-departure/
-    label: Blog post
 featured: false
 status: "Live"
 role: "Solo project"
@@ -32,4 +29,4 @@ highlights:
 
 The backend is a small FastAPI app using the official `kubernetes` Python client, kubeconfig locally, in-cluster config in the cluster, plus `metrics-server` for the live numbers. The whole board is one `/api/state` payload rendered by a static sprite frontend.
 
-Code: <https://github.com/miathedev/cluster-departure>, writeup in the [blog post](/blog/2026-11-17-cluster-departure/).
+Code: <https://github.com/miathedev/cluster-departure>.

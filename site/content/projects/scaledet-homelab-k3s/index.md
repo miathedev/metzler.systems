@@ -13,10 +13,6 @@ tech_stack:
   - Redis
   - Python
   - GitLab CI
-links:
-  - type: site
-    url: /blog/2026-11-03-scaledet-homelab-k3s/
-    label: Blog post
 featured: true
 status: "In progress"
 role: "Solo project"
@@ -32,5 +28,3 @@ highlights:
 ScaleDet is a VST3/AU plugin for the Akai MPC X that shows the musical key and scale of the playing audio in real time. The CNN behind it needs labeled training data, so the homelab harvests it from public internet radio, politely and rate-limited, and trains on the GPU.
 
 The project is organized as 17 tickets that double as structured CKA preparation: storage, workloads, scheduling, Jobs, Secrets, NetworkPolicy, RBAC, theory first, then the ticket on the real cluster, then Killercoda drills for what a single node can't cover.
-
-Full writeup in the [blog post](/blog/2026-11-03-scaledet-homelab-k3s/).
