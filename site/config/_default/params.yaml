@@ -76,7 +76,8 @@ hugoblox:
   # ----------------------------------------------------------------------------
   layout:
     # Border radius: 'none', 'sm', 'md', 'lg', or 'full'
-    radius: "md"
+    # Remove rounding
+    radius: "none"
     # Spacing density: 'compact', 'comfortable', or 'spacious'
     spacing: "comfortable"
     # Avatar shape in author profiles
@@ -291,7 +292,7 @@ hugoblox:
     # Note: Even with Premium, you can keep this false to support open source!
     # Get Premium: https://hugoblox.com/premium
     hide_attribution: false
-    
+
     # Affiliate referral code for rewards program
     # Join affiliate program: https://hugoblox.com/affiliates
     affiliate_code: ""

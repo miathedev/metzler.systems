@@ -1,0 +1,15 @@
+/* Alle Cards kantig: Tailwind v4 radius tokens auf 0 setzen.
+   Die rounded-* Utilities loesen border-radius ueber var(--radius-*) auf,
+   dieses File wird nach dem Theme-CSS geladen und gewinnt damit die Kaskade.
+   rounded-full (LEDs, Avatare) bleibt rund — dafuer gibt es keinen radius-Token. */
+:root {
+  --radius: 0;
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
+}
