@@ -29,8 +29,7 @@ PATH="$PWD/node_modules/.bin:$PATH" hugo server
 ## Produktions-Build
 
 ```bash
-PATH="$PWD/node_modules/.bin:$PATH" hugo --minify
-# Ergebnis: site/public/
+pnpm run build   # hugo --minify + pagefind (Such-Index), Ergebnis: site/public/
 ```
 
 ## Wo was liegt

@@ -26,7 +26,8 @@ RUN hugo mod tidy \
  && pnpm install --frozen-lockfile
 
 COPY . .
-RUN hugo --minify
+# pnpm run build fuehrt nach hugo noch pagefind aus, ohne Pagefind-Index landet /pagefind/pagefind.js als 404 im Image
+RUN pnpm run build
 
 # Letzte Stage
 FROM nginx/nginx-unprivileged:1.30-alpine@sha256:0c53a1f2890c3526bfd201440f0fd3970e5b78f80630f58284aad0d34b5ec7bd
